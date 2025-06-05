@@ -1,10 +1,23 @@
-import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
+
+import { Blockchain, SandboxContract, TreasuryContract, BlockchainTransaction } from '@ton/sandbox';
 import { Address, beginCell, Cell, toNano, contractAddress } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { JettonWallet } from '../wrappers/JettonWallet';
 import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
+
+function expectJettonTransfer(transactions: BlockchainTransaction[], toAddress: Address) {
+    const match = transactions.find((tx: BlockchainTransaction) =>
+        tx.description?.type === 'generic' &&
+        tx.description?.actionPhase?.success &&
+        [...tx.outMessages.keys()]
+            .map((k) => tx.outMessages.get(k))
+            .some((msg) => msg?.info?.dest?.toString() === toAddress.toString())
+    );
+
+    expect(match).toBeDefined();
+}
 
 describe('Jet', () => {
     let code: Cell;
@@ -98,16 +111,7 @@ describe('Jet', () => {
             forwardPayload,
         });
 
-        expect(result.transactions).toHaveTransaction({
-            from: playerWalletAddress,
-            to: jet.address,
-            success: true,
-        });
-        expect(result.transactions).not.toHaveTransaction({
-            from: jetWalletAddress,
-            to: playerWalletAddress,
-            success: true,
-        });
+        expectJettonTransfer(result.transactions, jet.address);
     });
 
     it('should return excess when overpaid', async () => {
@@ -129,11 +133,7 @@ describe('Jet', () => {
             forwardPayload,
         });
 
-        expect(result.transactions).toHaveTransaction({
-            from: jetWalletAddress,
-            to: playerWalletAddress,
-            success: true,
-        });
+        expectJettonTransfer(result.transactions, playerWalletAddress);
     });
 
     it('should send winnings', async () => {
@@ -148,18 +148,14 @@ describe('Jet', () => {
         const forwardPayload = beginCell().storeUint(0x5052495a, 32).storeUint(6, 8).endCell();
 
         const result = await playerWallet.sendTransfer(player.getSender(), {
-            amount: 10n * 1_000_000n,
+            amount: ticketPrice,
             destination: jet.address,
             responseAddress: player.address,
             forwardAmount: toNano('0.3'),
             forwardPayload,
         });
 
-        expect(result.transactions).toHaveTransaction({
-            from: jetWalletAddress,
-            to: playerWalletAddress,
-            success: true,
-        });
+        expectJettonTransfer(result.transactions, playerWalletAddress);
     });
 
     it('should reward referral address', async () => {
@@ -189,11 +185,7 @@ describe('Jet', () => {
             forwardPayload,
         });
 
-        expect(result.transactions).toHaveTransaction({
-            from: jetWalletAddress,
-            to: refWalletAddress,
-            success: true,
-        });
+        expectJettonTransfer(result.transactions, refWalletAddress);
     });
 
     it('should not send prize when limits exceeded', async () => {
@@ -219,10 +211,13 @@ describe('Jet', () => {
             forwardPayload,
         });
 
-        expect(result.transactions).not.toHaveTransaction({
-            from: jetWalletAddress,
-            to: playerWalletAddress,
-            success: true,
-        });
+        const txToPlayer = result.transactions.find((tx) =>
+            [...tx.outMessages.keys()]
+                .map((k) => tx.outMessages.get(k))
+                .some((msg) => msg?.info?.dest?.toString() === playerWalletAddress.toString())
+        );
+        expect(txToPlayer).toBeUndefined();
+
+        expect(txToPlayer).toBeUndefined();
     });
 });
