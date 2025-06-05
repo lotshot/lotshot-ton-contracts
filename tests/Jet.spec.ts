@@ -8,15 +8,28 @@ import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
 
 function expectJettonTransfer(transactions: BlockchainTransaction[], toAddress: Address) {
-    const match = transactions.find((tx: BlockchainTransaction) =>
-        tx.description?.type === 'generic' &&
-        tx.description?.actionPhase?.success &&
-        [...tx.outMessages.keys()]
-            .map((k) => tx.outMessages.get(k))
-            .some((msg) => msg?.info?.dest?.toString() === toAddress.toString())
-    );
+    function hasTransfer(txs: BlockchainTransaction[]): boolean {
+        for (const tx of txs) {
+            const hasMsg =
+                tx.description?.type === 'generic' &&
+                tx.description?.actionPhase?.success &&
+                [...tx.outMessages.keys()]
+                    .map((k) => tx.outMessages.get(k))
+                    .some((msg) => msg?.info?.dest?.toString() === toAddress.toString());
 
-    expect(match).toBeDefined();
+            if (hasMsg) {
+                return true;
+            }
+
+            if (tx.children && hasTransfer(tx.children)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    expect(hasTransfer(transactions)).toBe(true);
 }
 
 describe('Jet', () => {
