@@ -120,15 +120,20 @@ slice token_wallet_address
         slice ref_addr = null_addr();
         int has_ref = 0;
 
-        if (slice_bits(fwd_payload) == 534) {
+        slice label = begin_cell().end_cell().begin_parse();
+        int has_label = 0;
+
+        int bits = slice_bits(fwd_payload);
+        if (bits >= 534) {
             player_address = fwd_payload~load_msg_addr();
             ref_addr = fwd_payload~load_msg_addr();
             has_ref = 1;
-        } else {
-            if (slice_bits(fwd_payload) == 267) {
-                ref_addr = fwd_payload~load_msg_addr();
-                has_ref = 1;
-            }
+        } else if (bits >= 267) {
+            ref_addr = fwd_payload~load_msg_addr();
+            has_ref = 1;
+        } else if (bits >= 24) {
+            label = fwd_payload;
+            has_label = 1;
         }
 
         if (has_ref) {
