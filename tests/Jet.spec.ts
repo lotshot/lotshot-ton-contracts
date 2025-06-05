@@ -61,7 +61,7 @@ describe('Jet', () => {
     it('should send winnings', async () => {
         const player = await blockchain.treasury('player');
         const playerWallet = blockchain.openContract(
-            JettonWallet.createFromAddress(Address.parseRaw(player.address.toString())),
+            JettonWallet.createFromAddress(Address.parse(player.address.toString())),
         );
 
         const forwardPayload = beginCell().storeUint(0x5052495a, 32).storeUint(6, 8).endCell();
