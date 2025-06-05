@@ -17,6 +17,7 @@ describe('Jet', () => {
     let deployer: SandboxContract<TreasuryContract>;
     let jet: SandboxContract<Jet>;
     let jettonMaster: SandboxContract<JettonMaster>;
+    let jetWalletAddress: Address;
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -52,7 +53,7 @@ describe('Jet', () => {
 
         await jet.sendDeploy(deployer.getSender(), toNano('0.05'));
 
-        const jetWalletAddress = await jettonMaster.getWalletAddress(jet.address);
+        jetWalletAddress = await jettonMaster.getWalletAddress(jet.address);
         await jettonMaster.sendDeployWallet(deployer.getSender(), jet.address, toNano('0.05'));
         await jet.sendSetTokenWalletAddress(deployer.getSender(), jetWalletAddress, toNano('0.01'));
 
@@ -79,7 +80,8 @@ describe('Jet', () => {
         });
 
         expect(result.transactions).toHaveTransaction({
-            from: jet.address,
+            from: jetWalletAddress,
+            to: playerWalletAddress,
             success: true,
         });
     });
