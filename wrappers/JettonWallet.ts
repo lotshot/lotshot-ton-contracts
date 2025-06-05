@@ -17,7 +17,7 @@ export class JettonWallet implements Contract {
             forwardAmount: bigint;
             forwardPayload?: Cell;
         },
-    ) {
+    ): Promise<void> {
         const body = beginCell()
             .storeUint(0xf8a7ea5, 32)
             .storeUint(0, 64)
@@ -31,7 +31,7 @@ export class JettonWallet implements Contract {
         } else {
             body.storeUint(0, 1);
         }
-        await provider.internal(via, {
+        return await provider.internal(via, {
             value: args.forwardAmount + 1n, // minimal value just to cover fees
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: body.endCell(),
