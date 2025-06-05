@@ -32,6 +32,8 @@ cell generate_nft_content(int value, slice owner) {
 		.end_cell();
 
 
+        var forward_payload = begin_cell().store_slice(text).end_cell();
+
         var transfer = begin_cell()
                 .store_uint(0xf8a7ea5, 32)
                 .store_uint(0, 64)
@@ -40,7 +42,8 @@ cell generate_nft_content(int value, slice owner) {
                 .store_slice(my_address())
                 .store_maybe_ref(null())
                 .store_coins(transfer_fee())
-                .store_ref(begin_cell().store_slice(text).end_cell())
+                .store_uint(1, 1) ;; store reference indicator for Either
+                .store_ref(forward_payload)
                 .end_cell();
 
         var msg = begin_cell()
