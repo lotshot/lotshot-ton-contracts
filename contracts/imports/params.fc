@@ -11,6 +11,6 @@ int flag::regular() asm "0x10 PUSHINT";
 int flag::bounce() asm "0x8 PUSHINT";
 int mint_fee() asm "50000000 PUSHINT"; ;; 0.15 TON is too large, try set 0.05 TON
 int storage_coins() asm "20000000 PUSHINT"; ;; 0.02 TON
-int transfer_fee() asm "70000000 PUSHINT"; ;; 0.05 TON (maybe 0.07 TON is too small)
+int transfer_fee() asm "100000000 PUSHINT"; ;; 0.1 TON to cover forward fees
 int player_fee() asm "270000000 PUSHINT"; ;; 0.27 TON for one ticket
 int jetton_decimals() asm "1000000 PUSHINT"; ;; jetton has 6 decimal places

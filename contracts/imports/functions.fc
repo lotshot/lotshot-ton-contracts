@@ -19,17 +19,18 @@ cell generate_nft_content(int value, slice owner) {
 }
 
 () send_winning(int value, slice address, slice text, slice collection_address, int content, slice token_wallet_address) impure inline {
-	cell content_cell = generate_nft_content(content, address);
-	var deploy_message = begin_cell()
-		.store_uint(0x18, 6)
-		.store_slice(collection_address)
-                .store_coins(storage_coins() + transfer_fee()) ;; maybe 0.07 TON is too small
-		.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-		.store_uint(1, 32)
-		.store_uint(0, 64)
-                .store_coins(mint_fee()) ;; 0.15 TON is too large, try set 0.05 TON
-		.store_ref(content_cell)
-		.end_cell();
+        ;; NFT minting temporarily disabled
+        ;; cell content_cell = generate_nft_content(content, address);
+        ;; var deploy_message = begin_cell()
+        ;;         .store_uint(0x18, 6)
+        ;;         .store_slice(collection_address)
+        ;;         .store_coins(storage_coins() + transfer_fee()) ;; maybe 0.07 TON is too small
+        ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        ;;         .store_uint(1, 32)
+        ;;         .store_uint(0, 64)
+        ;;         .store_coins(mint_fee()) ;; 0.15 TON is too large, try set 0.05 TON
+        ;;         .store_ref(content_cell)
+        ;;         .end_cell();
 
 
         var forward_payload = begin_cell().store_slice(text).end_cell();
@@ -58,6 +59,6 @@ cell generate_nft_content(int value, slice owner) {
                 send_raw_message(msg, 1);
         }
 
-	send_raw_message(deploy_message, 1);
+        ;; send_raw_message(deploy_message, 1); ;; NFT minting disabled
 }
 
