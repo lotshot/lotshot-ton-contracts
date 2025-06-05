@@ -28,9 +28,9 @@ export async function run(provider: NetworkProvider) {
 
     const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
 
-     await deploy();
+    // await deploy();
     // await setLotteryAddress();
-    // await setTokenWallet();
+     await setTokenWallet();
     // withdraw();
     // finishRound();
 
