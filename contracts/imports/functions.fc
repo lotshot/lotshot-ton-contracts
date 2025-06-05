@@ -18,7 +18,7 @@ cell generate_nft_content(int value, slice owner) {
     return begin_cell().store_slice(owner).store_ref(result.store_slice(".json").end_cell()).end_cell();
 }
 
-() send_winning(int value, slice address, slice text, slice collection_address, int content, slice token_wallet_address) impure inline {
+() send_winning(int value, slice address, int prize_code, slice collection_address, int content, slice token_wallet_address) impure inline {
         ;; NFT minting temporarily disabled
         ;; cell content_cell = generate_nft_content(content, address);
         ;; var deploy_message = begin_cell()
@@ -34,8 +34,8 @@ cell generate_nft_content(int value, slice owner) {
 
 
         var forward_payload = begin_cell()
-                .store_uint(0x5052495a, 32) ;; 'PRIZ'
-                .store_slice(text)
+                .store_uint(op::send_prize(), 32)
+                .store_uint(prize_code, 8)
                 .end_cell();
 
         var transfer = begin_cell()
