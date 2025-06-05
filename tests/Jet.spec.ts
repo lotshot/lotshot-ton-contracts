@@ -230,7 +230,5 @@ describe('Jet', () => {
                 .some((msg) => msg?.info?.dest?.toString() === playerWalletAddress.toString())
         );
         expect(txToPlayer).toBeUndefined();
-
-        expect(txToPlayer).toBeUndefined();
     });
 });
