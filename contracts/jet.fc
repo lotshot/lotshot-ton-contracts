@@ -121,8 +121,8 @@ slice token_wallet_address
         slice ref_addr = null_addr();
         int has_ref = 0;
 
-        slice label = begin_cell().end_cell().begin_parse();
-        int has_label = 0;
+        int prize_code = -1;
+        int has_prize = 0;
 
         int bits = slice_bits(fwd_payload);
 
@@ -138,13 +138,13 @@ slice token_wallet_address
                 ref_addr = fwd_payload~load_msg_addr();
                 has_ref = 1;
             }
-            ;; label format: uint32 op_code + slice label (>= 56 bits)
+            ;; label format: uint32 op_code + uint8 prize_code
             else {
-                if (bits >= 56) {
-                    int op_code = fwd_payload~load_uint(32); ;; безопасный read
+                if (bits >= 40) {
+                    int op_code = fwd_payload~load_uint(32);
                     if (op_code == op::send_prize()) {
-                        label = fwd_payload;
-                        has_label = 1;
+                        prize_code = fwd_payload~load_uint(8);
+                        has_prize = 1;
                     }
                 }
             }
@@ -231,7 +231,7 @@ slice token_wallet_address
             if (major < 3) { ;; Выигрышей Major меньше 3
                 major += 1;
                 next_ticket_index += 1;
-                send_winning(MAJOR_PRIZE(), player_address, "major", collection_address, 1, token_wallet_address);
+                send_winning(MAJOR_PRIZE(), player_address, 1, collection_address, 1, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -252,7 +252,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 high += 1;
 
-                send_winning(HIGH_PRIZE(), player_address, "high", collection_address, 2, token_wallet_address);
+                send_winning(HIGH_PRIZE(), player_address, 2, collection_address, 2, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -273,7 +273,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 mid += 1;
 
-                send_winning(MID_PRIZE(), player_address, "mid", collection_address, 3, token_wallet_address);
+                send_winning(MID_PRIZE(), player_address, 3, collection_address, 3, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -294,7 +294,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 low_mid += 1;
 
-                send_winning(LOW_MID_PRIZE(), player_address, "low_mid", collection_address, 4, token_wallet_address);
+                send_winning(LOW_MID_PRIZE(), player_address, 4, collection_address, 4, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -315,7 +315,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 low += 1;
 
-                send_winning(LOW_PRIZE(), player_address, "low", collection_address, 5, token_wallet_address);
+                send_winning(LOW_PRIZE(), player_address, 5, collection_address, 5, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -336,7 +336,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 mini += 1;
 
-                send_winning(MINI_PRIZE(), player_address, "mini", collection_address, 6, token_wallet_address);
+                send_winning(MINI_PRIZE(), player_address, 6, collection_address, 6, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -354,7 +354,7 @@ slice token_wallet_address
 
         next_ticket_index += 1;
 
-        send_winning(0, player_address, "lose", collection_address, 7, token_wallet_address);
+        send_winning(0, player_address, 7, collection_address, 7, token_wallet_address);
 
         store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
 
@@ -401,7 +401,7 @@ slice token_wallet_address
     int low = counters_slice~load_uint(16);
     int mini = counters_slice~load_uint(16);
 
-    send_winning(JACKPOT_PRIZE(), winner, "jackpot", collection_address, 0, token_wallet_address);
+    send_winning(JACKPOT_PRIZE(), winner, 0, collection_address, 0, token_wallet_address);
 
     jp += 1;
 
