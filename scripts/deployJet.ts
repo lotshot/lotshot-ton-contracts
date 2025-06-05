@@ -7,7 +7,7 @@ import { Collection } from '../wrappers/Collection';
 // Данные для коллекции.
 export const collectionConfig = {
     owner: process.env.COLLECTION_OWNER || '', // Адрес владельца коллекции, получателя роялти
-    royalty: 42, // Размер роялти: для 10% = 10
+    royalty: 10, // Размер роялти: для 10% = 10
     content: 'ipfs://bafybeidk355qgbty7amukruuhaptqc5kadxs2m65jtxgabgzexmetdqwsq', // Указываем путь до хранилища метаданных пример: 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
@@ -30,7 +30,7 @@ export async function run(provider: NetworkProvider) {
 
     // await deploy();
     // await setLotteryAddress();
-     await setTokenWallet();
+    // await setTokenWallet();
     // withdraw();
     // finishRound();
 
