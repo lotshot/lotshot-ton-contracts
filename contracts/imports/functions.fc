@@ -19,36 +19,33 @@ cell generate_nft_content(int value, slice owner) {
     return begin_cell().store_slice(owner).store_ref(result.store_slice(".json").end_cell()).end_cell();
 }
 
-() send_winning(int value, slice address, int prize_code, slice token_wallet_address) impure inline {
+() send_winning(int value, slice addr, int prize_code, slice token_wallet) impure inline {
+    var fwd_payload = begin_cell()
+        .store_uint(op::send_prize(), 32)
+        .store_uint(prize_code, 8)
+        .end_cell();
 
+    var transfer = begin_cell()
+        .store_uint(op::jetton_transfer(), 32)
+        .store_uint(0, 64)
+        .store_coins(value * jetton_decimals())
+        .store_slice(addr)
+        .store_slice(my_address())
+        .store_uint(0, 1)                 ;; custom_payload = null
+        .store_coins(forward_fee())       ;; forward_ton_amount = 0.05
+        .store_uint(1, 1)                 ;; fwd_payload = ref
+        .store_ref(fwd_payload)
+        .end_cell();
 
-        var forward_payload = begin_cell()
-                .store_uint(op::send_prize(), 32)
-                .store_uint(prize_code, 8)
-                .end_cell();
+    var msg = begin_cell()
+        .store_uint(flag::bounce(), 6)   ;; ← здесь нужен правильный флаг!
+        .store_slice(token_wallet)
+        .store_coins(outer_fee())         ;; msg_value = 0.15
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_ref(transfer)
+        .end_cell();
 
-        var transfer = begin_cell()
-                .store_uint(0xf8a7ea5, 32)
-                .store_uint(0, 64)
-                .store_coins(value * jetton_decimals())
-                .store_slice(address)
-                .store_slice(my_address())
-                .store_uint(0, 1)
-                .store_coins(transfer_fee())
-                .store_uint(1, 1)
-                .store_ref(forward_payload)
-                .end_cell();
-
-        var msg = begin_cell()
-                .store_uint(0x10, 6)
-                .store_slice(token_wallet_address)
-                .store_coins(transfer_fee())
-                .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                .store_ref(transfer)
-                .end_cell();
-
-        if (value != 0) {
-                send_raw_message(msg, 1);
-        }
+    if (value != 0) {
+        send_raw_message(msg, 1);
+    }
 }
-

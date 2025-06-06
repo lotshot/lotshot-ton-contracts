@@ -45,8 +45,6 @@ slice token_wallet_address
     );
 }
 
-
-
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     slice cs = in_msg_full.begin_parse();
     int flags = cs~load_uint(4);
@@ -80,27 +78,26 @@ slice token_wallet_address
             fwd_payload = in_msg_body~load_ref().begin_parse();
         }
 
-        throw_unless(400, msg_value >= player_fee());
-
+        throw_unless(400, msg_value >= forward_fee());
         throw_unless(400, amount >= price);
 
         int excess = amount - price;
         if (excess > 0) {
-                var refund_transfer = begin_cell()
-                .store_uint(0xf8a7ea5, 32)
+            var refund_transfer = begin_cell()
+                .store_uint(op::jetton_transfer(), 32)  ;; use constant for clarity
                 .store_uint(0, 64)
                 .store_coins(excess)
                 .store_slice(sender_wallet)
                 .store_slice(my_address())
                 .store_maybe_ref(null())
-                .store_coins(transfer_fee())
+                .store_coins(outer_fee())
                 .store_uint(0, 1)
                 .end_cell();
 
             var refund_msg = begin_cell()
-                .store_uint(0x10, 6)
+                .store_uint(0x10, 6) ;; internal, no bounce (TONs вернутся контракту)
                 .store_slice(token_wallet_address)
-                .store_coins(transfer_fee())
+                .store_coins(outer_fee())
                 .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_ref(refund_transfer)
                 .end_cell();
@@ -108,9 +105,7 @@ slice token_wallet_address
         }
 
         slice player_address = sender_wallet;
-
         int prize_code = -1;
-        int has_prize = 0;
 
         int bits = slice_bits(fwd_payload);
 
@@ -121,7 +116,6 @@ slice token_wallet_address
                 int op_code = fwd_payload~load_uint(32);
                 if (op_code == op::send_prize()) {
                     prize_code = fwd_payload~load_uint(8);
-                    has_prize = 1;
                 }
             }
         }
@@ -130,7 +124,6 @@ slice token_wallet_address
         var x = rand(120);
 
         slice counters_slice = counters_ref.begin_parse();
-
         int jp = counters_slice~load_uint(16);
         int major = counters_slice~load_uint(16);
         int high = counters_slice~load_uint(16);
@@ -311,7 +304,7 @@ slice token_wallet_address
         return();
     }
 
-    int op = in_msg_body~load_uint(32);
+    op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
 
 

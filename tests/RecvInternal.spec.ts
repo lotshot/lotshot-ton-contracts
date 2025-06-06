@@ -50,7 +50,7 @@ async function createContract(options?: { counters?: number[]; rand?: number }) 
         override: {
             rand: () => options?.rand ?? 0,
             jetton_decimals: () => 1_000_000n,
-            transfer_fee: () => 0n,
+            outer_fee: () => 0n,
         },
     });
     return sc;

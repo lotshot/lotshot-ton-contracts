@@ -30,7 +30,7 @@ export async function run(provider: NetworkProvider) {
 
     // await deploy();
     // await setLotteryAddress();
-     await setTokenWallet();
+    //await setTokenWallet();
     // withdraw();
     // finishRound();
 

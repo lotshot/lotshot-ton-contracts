@@ -108,7 +108,7 @@ slice calculate_nft_item_address(int wc, cell state_init) {
                 slice nft_addr = calculate_nft_item_address(workchain(), st);
 
                 var transfer_body = begin_cell()
-                        .store_uint(op::transfer(), 32)
+                        .store_uint(op::nft_transfer(), 32)
                         .store_uint(0, 64)
                         .store_slice(new_owner)
                         .store_slice(lottery_address)
@@ -120,7 +120,7 @@ slice calculate_nft_item_address(int wc, cell state_init) {
                 var transfer_msg = begin_cell()
                         .store_uint(0x18, 6)
                         .store_slice(nft_addr)
-                        .store_coins(transfer_fee())
+                        .store_coins(outer_fee())
                         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                         .store_ref(transfer_body)
                         .end_cell();
