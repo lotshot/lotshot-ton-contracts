@@ -14,6 +14,6 @@ int storage_coins() asm "20000000 PUSHINT"; ;; 0.02 TON
 int player_fee() asm "50000000 PUSHINT"; ;; 0.05 TON
 int jetton_decimals() asm "1000000 PUSHINT"; ;; jetton has 6 decimal places
 ;; 0.15 TON кладём в сообщение для оплаты всех расходов
-int outer_fee() asm "150000000 PUSHINT";    ;; 0.15 TON
+int outer_fee() asm "200000000 PUSHINT";    ;; 0.15 TON
 ;; 0.05 TON пересылаем игроку вместе с jetton-transfer
 int forward_fee() asm "50000000 PUSHINT";   ;; 0.05 TON
