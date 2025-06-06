@@ -19,19 +19,7 @@ cell generate_nft_content(int value, slice owner) {
     return begin_cell().store_slice(owner).store_ref(result.store_slice(".json").end_cell()).end_cell();
 }
 
-() send_winning(int value, slice address, int prize_code, slice collection_address, int content, slice token_wallet_address) impure inline {
-        ;; NFT minting temporarily disabled
-        ;; cell content_cell = generate_nft_content(content, address);
-        ;; var deploy_message = begin_cell()
-        ;;         .store_uint(0x18, 6)
-        ;;         .store_slice(collection_address)
-        ;;         .store_coins(storage_coins() + transfer_fee()) ;; maybe 0.07 TON is too small
-        ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-        ;;         .store_uint(1, 32)
-        ;;         .store_uint(0, 64)
-        ;;         .store_coins(mint_fee()) ;; 0.15 TON is too large, try set 0.05 TON
-        ;;         .store_ref(content_cell)
-        ;;         .end_cell();
+() send_winning(int value, slice address, int prize_code, slice token_wallet_address) impure inline {
 
 
         var forward_payload = begin_cell()
@@ -45,9 +33,9 @@ cell generate_nft_content(int value, slice owner) {
                 .store_coins(value * jetton_decimals())
                 .store_slice(address)
                 .store_slice(my_address())
-                .store_maybe_ref(null())
+                .store_uint(0, 1)
                 .store_coins(transfer_fee())
-                .store_uint(1, 1) ;; store reference indicator for Either
+                .store_uint(1, 1)
                 .store_ref(forward_payload)
                 .end_cell();
 
@@ -62,7 +50,5 @@ cell generate_nft_content(int value, slice owner) {
         if (value != 0) {
                 send_raw_message(msg, 1);
         }
-
-        ;; send_raw_message(deploy_message, 1); ;; NFT minting disabled
 }
 

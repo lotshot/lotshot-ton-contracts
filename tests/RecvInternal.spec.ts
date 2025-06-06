@@ -17,7 +17,7 @@ function buildJettonTransfer(amount: bigint, wallet: Address, payload: Cell) {
         .endCell();
 }
 
-async function createContract(options?: { counters?: number[]; refPercent?: number; rand?: number }) {
+async function createContract(options?: { counters?: number[]; rand?: number }) {
     const code = await compile('Jet');
     const counters = options?.counters ?? [0, 0, 0, 0, 0, 0, 0];
     const countersCell = beginCell()
@@ -31,10 +31,8 @@ async function createContract(options?: { counters?: number[]; refPercent?: numb
         .endCell();
 
     const data = jetConfigToCell({
-        collectionAddress: Address.parse('0:' + '0'.repeat(64)),
         adminAddress: '0:' + '1'.repeat(64),
         price: ticketPrice,
-        refPercent: options?.refPercent ?? 0,
         tokenAddress: Address.parse('0:' + '2'.repeat(64)),
     });
     // replace counters in generated cell
@@ -72,18 +70,6 @@ describe('recv_internal direct', () => {
         expect(fwd.loadUint(32)).toBe(0x5052495a);
     });
 
-    it('pays referral address when provided', async () => {
-        const contract = await createContract({ refPercent: 10, rand: 1 });
-        const player = Address.parse('0:' + '3'.repeat(64));
-        const ref = Address.parse('0:' + '4'.repeat(64));
-        const payload = beginCell().storeAddress(player).storeAddress(ref).endCell();
-        const body = buildJettonTransfer(ticketPrice, player, payload);
-        const msg = internal({ to: contract.address, from: player, value: playerFee, bounce: true, body });
-        const trace = await contract.sendInternalMessage(msg);
-        expect(trace.exitCode).toBe(0);
-        const hasRefTransfer = trace.outMessages.some(m => m.info.dest?.toString() === ref.toString());
-        expect(hasRefTransfer).toBe(true);
-    });
 
     it('skips transfer when prizes exhausted', async () => {
         const counters = [0, 3, 10, 35, 35, 30, 7];
@@ -97,15 +83,5 @@ describe('recv_internal direct', () => {
         expect(trace.outMessages.length).toBe(0);
     });
 
-    it('handles USDT style transfer with ref payload', async () => {
-        const contract = await createContract({ refPercent: 10, rand: 1 });
-        const player = Address.parse('0:' + '3'.repeat(64));
-        const ref = Address.parse('0:' + '4'.repeat(64));
-        const payload = beginCell().storeAddress(ref).endCell();
-        const body = buildJettonTransfer(ticketPrice, player, payload);
-        const msg = internal({ to: contract.address, from: player, value: playerFee, bounce: true, body, state: null, isRight: true });
-        const trace = await contract.sendInternalMessage(msg);
-        expect(trace.exitCode).toBe(0);
-    });
 });
 
