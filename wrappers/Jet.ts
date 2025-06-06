@@ -1,10 +1,8 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
 export type JetConfig = {
-    collectionAddress: Address;
     adminAddress: string;
     price: bigint;
-    refPercent: number;
     tokenAddress: Address;
 };
 
@@ -22,10 +20,8 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .endCell()
         )
         .storeUint(0, 64)
-        .storeAddress(config.collectionAddress)
         .storeAddress(Address.parse(config.adminAddress))
         .storeUint(config.price, 128)
-        .storeUint(config.refPercent, 16)
         .storeAddress(config.tokenAddress)
         .endCell()
 }

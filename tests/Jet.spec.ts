@@ -47,8 +47,7 @@ describe('Jet', () => {
 
     const ticketPrice = 10n * 1_000_000n;
 
-    async function deployLottery(options?: { refPercent?: number; counters?: number[] }) {
-        const refPercent = options?.refPercent ?? 0;
+    async function deployLottery(options?: { counters?: number[] }) {
         const counters = options?.counters ?? [0, 0, 0, 0, 0, 0, 0];
 
         const countersCell = beginCell()
@@ -65,9 +64,7 @@ describe('Jet', () => {
             .storeRef(countersCell)
             .storeUint(0, 64)
             .storeAddress(deployer.address)
-            .storeAddress(deployer.address)
             .storeUint(ticketPrice, 128)
-            .storeUint(refPercent, 16)
             .storeAddress(deployer.address)
             .endCell();
 
@@ -171,35 +168,6 @@ describe('Jet', () => {
         expectJettonTransfer(result.transactions, playerWalletAddress);
     });
 
-    it('should reward referral address', async () => {
-        jet = await deployLottery({ refPercent: 10 });
-        jetWalletAddress = await jettonMaster.getWalletAddress(jet.address);
-        await jettonMaster.sendDeployWallet(deployer.getSender(), jet.address, toNano('0.05'));
-        await jet.sendSetTokenWalletAddress(deployer.getSender(), jetWalletAddress, toNano('0.01'));
-        await jettonMaster.sendMint(deployer.getSender(), jetWalletAddress, 1_000_000_000n);
-
-        const player = await blockchain.treasury('player');
-        const referral = await blockchain.treasury('ref');
-        const playerWalletAddress = await jettonMaster.getWalletAddress(player.address);
-        const refWalletAddress = await jettonMaster.getWalletAddress(referral.address);
-        await jettonMaster.sendDeployWallet(deployer.getSender(), player.address, toNano('0.05'));
-        await jettonMaster.sendDeployWallet(deployer.getSender(), referral.address, toNano('0.05'));
-        await jettonMaster.sendMint(deployer.getSender(), playerWalletAddress, 20n * 1_000_000n);
-
-        const playerWallet = blockchain.openContract(JettonWallet.createFromAddress(playerWalletAddress));
-
-        const forwardPayload = beginCell().storeAddress(player.address).storeAddress(referral.address).endCell();
-
-        const result = await playerWallet.sendTransfer(player.getSender(), {
-            amount: ticketPrice,
-            destination: jet.address,
-            responseAddress: player.address,
-            forwardAmount: toNano('0.3'),
-            forwardPayload,
-        });
-
-        expectJettonTransfer(result.transactions, refWalletAddress);
-    });
 
     it('should not send prize when limits exceeded', async () => {
         jet = await deployLottery({ counters: [0, 3, 10, 35, 35, 30, 7] });

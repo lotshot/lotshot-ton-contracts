@@ -13,10 +13,8 @@ int MINI_PRIZE() asm "10 PUSHINT";       ;; 10 tokens
 (
     cell, ;; counters
     int, ;; next_ticket_index
-    slice, ;; collection_address
     slice, ;; owner address
     int, ;; ticket_price (jettons)
-    int, ;; ref_percent
     slice ;; token_wallet_address
 ) load_data() inline {
     var ds = get_data().begin_parse();
@@ -24,9 +22,7 @@ int MINI_PRIZE() asm "10 PUSHINT";       ;; 10 tokens
         ds~load_ref(),
         ds~load_uint(64),
         ds~load_msg_addr(),
-        ds~load_msg_addr(),
         ds~load_uint(128), ;; ticket_price in jettons
-        ds~load_uint(16),
         ds~load_msg_addr()
     );
 }
@@ -34,20 +30,16 @@ int MINI_PRIZE() asm "10 PUSHINT";       ;; 10 tokens
 () store_data(
 cell counters_ref,
 int next_ticket_index,
-slice collection_address,
 slice admin_address,
 int price,
-int ref_percent,
 slice token_wallet_address
 ) impure inline {
     set_data(
         begin_cell()
             .store_ref(counters_ref)
             .store_uint(next_ticket_index, 64)
-            .store_slice(collection_address)
             .store_slice(admin_address)
             .store_uint(price, 128)
-            .store_uint(ref_percent, 16)
             .store_slice(token_wallet_address)
             .end_cell()
     );
@@ -67,10 +59,8 @@ slice token_wallet_address
     var (
         cell counters_ref,
         int next_ticket_index,
-        slice collection_address,
         slice admin_address,
         int price,
-        int ref_percent,
         slice token_wallet_address
     ) = load_data();
 
@@ -118,61 +108,21 @@ slice token_wallet_address
         }
 
         slice player_address = sender_wallet;
-        slice ref_addr = null_addr();
-        int has_ref = 0;
 
         int prize_code = -1;
         int has_prize = 0;
 
         int bits = slice_bits(fwd_payload);
 
-        ;; full format: player + referral address
-        if (bits >= 534) {
+        if (bits >= 267) {
             player_address = fwd_payload~load_msg_addr();
-            ref_addr = fwd_payload~load_msg_addr();
-            has_ref = 1;
-        }
-        ;; ref format: only referral address
-        else {
-            if (bits >= 267) {
-                ref_addr = fwd_payload~load_msg_addr();
-                has_ref = 1;
-            }
-            ;; label format: uint32 op_code + uint8 prize_code
-            else {
-                if (bits >= 40) {
-                    int op_code = fwd_payload~load_uint(32);
-                    if (op_code == op::send_prize()) {
-                        prize_code = fwd_payload~load_uint(8);
-                        has_prize = 1;
-                    }
+        } else {
+            if (bits >= 40) {
+                int op_code = fwd_payload~load_uint(32);
+                if (op_code == op::send_prize()) {
+                    prize_code = fwd_payload~load_uint(8);
+                    has_prize = 1;
                 }
-            }
-        }
-
-
-        if (has_ref) {
-            int referral_amount = (price * ref_percent) / 100;
-            if (referral_amount > 0) {
-                var ref_transfer = begin_cell()
-                    .store_uint(0xf8a7ea5, 32)
-                    .store_uint(0, 64)
-                    .store_coins(referral_amount)
-                    .store_slice(ref_addr)
-                    .store_slice(sender_wallet)
-                    .store_maybe_ref(null())
-                    .store_coins(transfer_fee())
-                    .store_uint(0, 1)
-                    .end_cell();
-
-                var ref_msg = begin_cell()
-                    .store_uint(0x10, 6)
-                    .store_slice(token_wallet_address)
-                    .store_coins(transfer_fee())
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                    .store_ref(ref_transfer)
-                    .end_cell();
-                send_raw_message(ref_msg, 1);
             }
         }
 
@@ -220,7 +170,7 @@ slice token_wallet_address
                 send_raw_message(msg, 1);
 
 
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
 
                 ;; Отправить сообщение админу
@@ -231,7 +181,7 @@ slice token_wallet_address
             if (major < 3) { ;; Выигрышей Major меньше 3
                 major += 1;
                 next_ticket_index += 1;
-                send_winning(MAJOR_PRIZE(), player_address, 1, collection_address, 1, token_wallet_address);
+                send_winning(MAJOR_PRIZE(), player_address, 1, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -242,7 +192,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
@@ -252,7 +202,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 high += 1;
 
-                send_winning(HIGH_PRIZE(), player_address, 2, collection_address, 2, token_wallet_address);
+                send_winning(HIGH_PRIZE(), player_address, 2, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -263,7 +213,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
@@ -273,7 +223,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 mid += 1;
 
-                send_winning(MID_PRIZE(), player_address, 3, collection_address, 3, token_wallet_address);
+                send_winning(MID_PRIZE(), player_address, 3, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -284,7 +234,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
@@ -294,7 +244,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 low_mid += 1;
 
-                send_winning(LOW_MID_PRIZE(), player_address, 4, collection_address, 4, token_wallet_address);
+                send_winning(LOW_MID_PRIZE(), player_address, 4, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -305,7 +255,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
@@ -315,7 +265,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 low += 1;
 
-                send_winning(LOW_PRIZE(), player_address, 5, collection_address, 5, token_wallet_address);
+                send_winning(LOW_PRIZE(), player_address, 5, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -326,7 +276,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
@@ -336,7 +286,7 @@ slice token_wallet_address
                 next_ticket_index += 1;
                 mini += 1;
 
-                send_winning(MINI_PRIZE(), player_address, 6, collection_address, 6, token_wallet_address);
+                send_winning(MINI_PRIZE(), player_address, 6, token_wallet_address);
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -347,16 +297,16 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
                 return();
             }
         }
 
         next_ticket_index += 1;
 
-        send_winning(0, player_address, 7, collection_address, 7, token_wallet_address);
+        send_winning(0, player_address, 7, token_wallet_address);
 
-        store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+        store_data(counters_ref, next_ticket_index, admin_address, price, token_wallet_address);
 
         return();
     }
@@ -384,7 +334,7 @@ slice token_wallet_address
 
     if (op == 3) { ;; change_admin_address
     throw_unless(401, equal_slices(sender_address,admin_address));
-    store_data(counters_ref, next_ticket_index, collection_address, in_msg_body~load_msg_addr(), price, ref_percent, token_wallet_address);
+    store_data(counters_ref, next_ticket_index, in_msg_body~load_msg_addr(), price, token_wallet_address);
     return();
     }
 
@@ -401,7 +351,7 @@ slice token_wallet_address
     int low = counters_slice~load_uint(16);
     int mini = counters_slice~load_uint(16);
 
-    send_winning(JACKPOT_PRIZE(), winner, 0, collection_address, 0, token_wallet_address);
+    send_winning(JACKPOT_PRIZE(), winner, 0, token_wallet_address);
 
     jp += 1;
 
@@ -415,19 +365,19 @@ slice token_wallet_address
     .store_uint(mini, 16)
     .end_cell();
 
-    store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+    store_data(new_ref, next_ticket_index, admin_address, price, token_wallet_address);
     return();
     }
 
     if (op == 5) { ;; set token_wallet_address
     throw_unless(401, equal_slices(sender_address, admin_address));
-    store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr());
+    store_data(counters_ref, next_ticket_index, admin_address, price, in_msg_body~load_msg_addr());
     return();
     }
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
-    (cell counters_ref, _, _, _, _, _, _) = load_data();
+    (cell counters_ref, _, _, _, _) = load_data();
 
     slice counters_slice = counters_ref.begin_parse();
     int jp = counters_slice~load_uint(16);
@@ -449,24 +399,20 @@ slice token_wallet_address
 }
 
 
-(cell, int, slice, slice, int, int, slice) get_full_data() method_id {
+(cell, int, slice, int, slice) get_full_data() method_id {
     var (
         cell counters_ref,
         int next_ticket_index,
-        slice collection_address,
         slice admin_address,
         int price,
-        int ref_percent,
         slice token_wallet_address
     ) = load_data();
 
     return (
         counters_ref,
         next_ticket_index,
-        collection_address,
         admin_address,
         price,
-        ref_percent,
         token_wallet_address
     );
 }
