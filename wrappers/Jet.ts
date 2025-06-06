@@ -3,6 +3,7 @@ import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, 
 export type JetConfig = {
     adminAddress: string;
     price: bigint;
+    refPercent: number;
     tokenAddress: Address;
 };
 
@@ -22,6 +23,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeUint(0, 64)
         .storeAddress(Address.parse(config.adminAddress))
         .storeUint(config.price, 128)
+        .storeUint(config.refPercent, 16)
         .storeAddress(config.tokenAddress)
         .endCell()
 }

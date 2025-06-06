@@ -33,6 +33,7 @@ async function createContract(options?: { counters?: number[]; rand?: number }) 
     const data = jetConfigToCell({
         adminAddress: '0:' + '1'.repeat(64),
         price: ticketPrice,
+        refPercent: 10,
         tokenAddress: Address.parse('0:' + '2'.repeat(64)),
     });
     // replace counters in generated cell
@@ -81,6 +82,25 @@ describe('recv_internal direct', () => {
         const trace = await contract.sendInternalMessage(msg);
         expect(trace.exitCode).toBe(0);
         expect(trace.outMessages.length).toBe(0);
+    });
+
+    it('pays referral', async () => {
+        const contract = await createContract({ rand: 119 });
+        const player = Address.parse('0:' + '3'.repeat(64));
+        const referral = Address.parse('0:' + '4'.repeat(64));
+        const payload = beginCell().storeAddress(player).storeAddress(referral).endCell();
+        const body = buildJettonTransfer(ticketPrice, player, payload);
+        const msg = internal({ to: contract.address, from: player, value: playerFee, bounce: true, body });
+        const trace = await contract.sendInternalMessage(msg);
+        expect(trace.exitCode).toBe(0);
+        expect(trace.outMessages).toHaveLength(1);
+        const out = trace.outMessages[0];
+        expect(out.info.dest?.toString()).toBe('0:' + '2'.repeat(64));
+        const slice = out.body.beginParse();
+        expect(slice.loadUint(32)).toBe(0x0f8a7ea5);
+        slice.loadUint(64); // query id
+        expect(slice.loadCoins()).toBe(1_000_000n);
+        expect(slice.loadAddress().toString()).toBe(referral.toString());
     });
 
 });

@@ -65,6 +65,7 @@ describe('Jet', () => {
             .storeUint(0, 64)
             .storeAddress(deployer.address)
             .storeUint(ticketPrice, 128)
+            .storeUint(10, 16)
             .storeAddress(deployer.address)
             .endCell();
 
