@@ -67,6 +67,7 @@ describe('Jet', () => {
             .storeUint(ticketPrice, 128)
             .storeUint(10, 16)
             .storeAddress(deployer.address)
+            .storeAddress(Address.parse('0:' + '0'.repeat(64)))
             .endCell();
 
         const init = { code, data };
@@ -199,5 +200,19 @@ describe('Jet', () => {
                 .some((msg) => msg?.info?.dest?.toString() === playerWalletAddress.toString())
         );
         expect(txToPlayer).toBeUndefined();
+    });
+
+    it('should change admin address', async () => {
+        const newAdmin = await blockchain.treasury('newAdmin');
+        await jet.sendChangeAdminAddress(deployer.getSender(), newAdmin.address, toNano('0.01'));
+        const data = await jet.getFullData();
+        expect(data.adminAddress.toString()).toBe(newAdmin.address.toString());
+    });
+
+    it('should change token wallet', async () => {
+        const newWallet = Address.parse('0:' + '5'.repeat(64));
+        await jet.sendSetTokenWalletAddress(deployer.getSender(), newWallet, toNano('0.01'));
+        const data = await jet.getFullData();
+        expect(data.tokenWalletAddress.toString()).toBe(newWallet.toString());
     });
 });

@@ -68,7 +68,8 @@ slice collection_address
         slice admin_address,
         int price,
         int ref_percent,
-        slice token_wallet_address
+        slice token_wallet_address,
+        slice collection_address
     ) = load_data();
 
     int op = in_msg_body.preload_uint(32);
@@ -208,10 +209,9 @@ slice collection_address
                 send_raw_message(msg, 1);
 
 
-                store_data(new_ref, next_ticket_index, admin_address, price, ref_percent, token_wallet_address, collection_address);
+                store_data(counters_ref, next_ticket_index, admin_address, price, ref_percent, token_wallet_address, collection_address);
                 return();
 
-                ;; Отправить сообщение админу
             }
         }
 
@@ -344,7 +344,7 @@ slice collection_address
 
         send_winning(0, player_address, 7, token_wallet_address);
 
-        store_data(new_ref, next_ticket_index, admin_address, price, ref_percent, token_wallet_address, collection_address);
+        store_data(counters_ref, next_ticket_index, admin_address, price, ref_percent, token_wallet_address, collection_address);
 
         return();
     }
@@ -371,9 +371,9 @@ slice collection_address
     }
 
     if (op == 3) { ;; change_admin_address
-    throw_unless(401, equal_slices(sender_address,admin_address));
-        store_data(new_ref, next_ticket_index, admin_address, price, ref_percent, token_wallet_address, collection_address);
-    return();
+        throw_unless(401, equal_slices(sender_address, admin_address));
+        store_data(counters_ref, next_ticket_index, in_msg_body~load_msg_addr(), price, ref_percent, token_wallet_address, collection_address);
+        return();
     }
 
     if (op == 4) { ;; send nft to jackpot winner

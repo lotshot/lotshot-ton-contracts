@@ -103,5 +103,18 @@ describe('recv_internal direct', () => {
         expect(slice.loadAddress().toString()).toBe(referral.toString());
     });
 
+    it('accepts null referral address', async () => {
+        const contract = await createContract({ rand: 1 });
+        const player = Address.parse('0:' + '3'.repeat(64));
+        const payload = beginCell()
+            .storeAddress(player)
+            .storeAddress(Address.parse('0:' + '0'.repeat(64)))
+            .endCell();
+        const body = buildJettonTransfer(ticketPrice, player, payload);
+        const msg = internal({ to: contract.address, from: player, value: playerFee, bounce: true, body });
+        const trace = await contract.sendInternalMessage(msg);
+        expect(trace.exitCode).toBe(0);
+    });
+
 });
 
