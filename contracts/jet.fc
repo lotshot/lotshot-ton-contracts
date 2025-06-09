@@ -172,7 +172,7 @@ slice token_wallet_address
 
 
         randomize_lt();
-        var x = rand(120);
+        var x = rand(1200); ;; random number 0..1199 for 1 200-ticket round
 
         slice counters_slice = counters_ref.begin_parse();
 
@@ -222,8 +222,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 3) { ;; выпало до 4
-            if (major < 3) { ;; Выигрышей Major меньше 3
+        if (x < 2) { ;; Major 1/1200
+            if (major < 1) { ;; максимум 1 Major выигрыша
                 major += 1;
                 next_ticket_index += 1;
                 send_winning(MAJOR_PRIZE(), player_address, 1, collection_address, 1, token_wallet_address);
@@ -241,8 +241,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 8) {
-            if (high < 10) {
+        if (x < 3) { ;; High 1/1200
+            if (high < 1) { ;; максимум 1 High выигрыша
                 next_ticket_index += 1;
                 high += 1;
 
@@ -262,8 +262,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 28) {
-            if (mid < 35) {
+        if (x < 8) { ;; Mid 5/1200
+            if (mid < 5) { ;; максимум 5 Mid выигрышей
                 next_ticket_index += 1;
                 mid += 1;
 
@@ -283,8 +283,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 48) {
-            if (low_mid < 35) {
+        if (x < 23) { ;; Low Mid 15/1200
+            if (low_mid < 15) { ;; максимум 15 Low Mid выигрышей
                 next_ticket_index += 1;
                 low_mid += 1;
 
@@ -304,8 +304,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 73) {
-            if (low < 30) {
+        if (x < 53) { ;; Low 30/1200
+            if (low < 30) { ;; максимум 30 Low выигрышей
                 next_ticket_index += 1;
                 low += 1;
 
@@ -325,8 +325,8 @@ slice token_wallet_address
             }
         }
 
-        if (x < 108) {
-            if (mini < 7) {
+        if (x < 172) { ;; Mini 119/1200
+            if (mini < 119) { ;; максимум 119 Mini выигрышей
                 next_ticket_index += 1;
                 mini += 1;
 
