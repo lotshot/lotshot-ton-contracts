@@ -131,27 +131,36 @@ slice token_wallet_address
         }
 
         if (has_ref) {
-            int referral_amount = (price * ref_percent) / 100;
+
+            ;; 2. payload «реф. ревард» (для UI)
+            var ui_pl = begin_cell()
+                .store_uint(op::send_reff(), 32)
+                .store_uint(ref_percent, 8)
+                .end_cell();
+
+            int referral_amount = (price * ref_percent) / 100 * jetton_decimals();
             if (referral_amount > 0) {
                 var ref_transfer = begin_cell()
-                    .store_uint(0xf8a7ea5, 32)
+                    .store_uint(op::jetton_transfer(), 32)
                     .store_uint(0, 64)
                     .store_coins(referral_amount)
                     .store_slice(ref_addr)
-                    .store_slice(sender_wallet)
-                    .store_maybe_ref(null())
-                    .store_coins(forward_fee())
+                    .store_slice(my_address())
                     .store_uint(0, 1)
+                    .store_coins(forward_fee())   ;; 0.05 TON
+                    .store_uint(1, 1)
+                    .store_ref(ui_pl)
                     .end_cell();
 
                 var ref_msg = begin_cell()
-                    .store_uint(0x10, 6)
+                    .store_uint(0x18, 6)
                     .store_slice(token_wallet_address)
-                    .store_coins(forward_fee())
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_coins(outer_fee())     ;; 0.15 TON
+                    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_ref(ref_transfer)
                     .end_cell();
-                send_raw_message(ref_msg, 1);
+
+                send_raw_message(ref_msg, 1);  ;; Jetton → рефферал
             }
         }
 
