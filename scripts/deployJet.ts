@@ -89,20 +89,16 @@ export async function run(provider: NetworkProvider) {
 
     // Выведет деньги с контракта лотереи. Баланс лотереи должен быть больше 0.05 TON
     async function withdraw() {
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano('0.01'),
-            body: beginCell().storeUint(2, 32).storeUint(0, 64).endCell(),
-        });
+        await jet.sendWithdraw(provider.sender(), toNano('0.01'));
     }
 
     // Остановит работу лотерейного контракта. Также будет создан нфт для победителя
     async function finishRound(winner_address: string) {
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano(0.05),
-            body: beginCell().storeUint(4, 32).storeUint(0, 64).storeAddress(Address.parse(winner_address)).endCell(),
-        });
+        await jet.sendFinishRound(
+            provider.sender(),
+            Address.parse(winner_address),
+            toNano(0.05),
+        );
     }
 
     await provider.waitForDeploy(jet.address);
