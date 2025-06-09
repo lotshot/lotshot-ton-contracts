@@ -83,16 +83,10 @@ describe('Jet', () => {
         expect(Number(counters.low)).toBeLessThanOrEqual(30);
         expect(Number(counters.mini)).toBeLessThanOrEqual(119);
 
-        await deployer.send(
-            internal({
-                to: jet.address,
-                value: toNano('0.1'),
-                body: beginCell()
-                    .storeUint(4, 32)
-                    .storeUint(0, 64)
-                    .storeAddress(player.address)
-                    .endCell(),
-            }),
+        await jet.sendFinishRound(
+            deployer.getSender(),
+            player.address,
+            toNano('0.1'),
         );
 
         const after = await jet.getCounters();

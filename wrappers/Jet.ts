@@ -94,6 +94,40 @@ export class Jet implements Contract {
         });
     }
 
+    async sendWithdraw(
+        provider: ContractProvider,
+        via: Sender,
+        value: bigint,
+    ) {
+        const body = beginCell()
+            .storeUint(2, 32)
+            .storeUint(0, 64)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendFinishRound(
+        provider: ContractProvider,
+        via: Sender,
+        winner: Address,
+        value: bigint,
+    ) {
+        const body = beginCell()
+            .storeUint(4, 32)
+            .storeUint(0, 64)
+            .storeAddress(winner)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
     async getCounters(provider: ContractProvider) {
         const res = await provider.get('get_counters', []);
         return {
