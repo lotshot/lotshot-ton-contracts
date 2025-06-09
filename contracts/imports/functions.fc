@@ -1,4 +1,5 @@
 #include "params.fc";
+#include "op-codes.fc";
 
 cell generate_nft_content(int value, slice owner) {
     builder result = begin_cell();
@@ -18,43 +19,65 @@ cell generate_nft_content(int value, slice owner) {
     return begin_cell().store_slice(owner).store_ref(result.store_slice(".json").end_cell()).end_cell();
 }
 
-() send_winning(int value, slice address, slice text, slice collection_address, int content, slice token_wallet_address) impure inline {
-	cell content_cell = generate_nft_content(content, address);
-	var deploy_message = begin_cell()
-		.store_uint(0x18, 6)
-		.store_slice(collection_address)
-                .store_coins(storage_coins() + transfer_fee()) ;; maybe 0.07 TON is too small
-		.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-		.store_uint(1, 32)
-		.store_uint(0, 64)
-                .store_coins(mint_fee()) ;; 0.15 TON is too large, try set 0.05 TON
-		.store_ref(content_cell)
-		.end_cell();
+() send_winning(
+int   prize,            ;; сумма приза в jetton’ах
+slice player,           ;; адрес игрока
+int   prize_code,       ;; 0..7
+slice collection_addr,  ;; NFT-collection
+int   content_id,       ;; уникальный ID (можно next_ticket)
+slice token_wallet      ;; Jetton-wallet контракта
+) impure inline {
 
+    ;; 1. NFT-контент
+    cell nft_content = generate_nft_content(content_id, player);
 
-        var transfer = begin_cell()
-                .store_uint(0xf8a7ea5, 32)
-                .store_uint(0, 64)
-                .store_coins(value)
-                .store_slice(address)
-                .store_slice(my_address())
-                .store_maybe_ref(null())
-                .store_coins(transfer_fee())
-                .store_ref(begin_cell().store_slice(text).end_cell())
-                .end_cell();
+    ;; body для коллекции: op-1, query-0, ref, mint_fee
+    var mint_body = begin_cell()
+        .store_uint(1, 32)          ;; op = 1
+        .store_uint(0, 64)          ;; query_id
+        .store_ref(nft_content)     ;; индивидуальный JSON
+        .store_coins(mint_fee())    ;; ← то, чего не хватало!
+        .end_cell();
 
-        var msg = begin_cell()
-                .store_uint(0x10, 6)
-                .store_slice(token_wallet_address)
-                .store_coins(transfer_fee())
-                .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                .store_ref(transfer)
-                .end_cell();
+    ;; внутр.-сообщение в коллекцию
+    var nft_msg = begin_cell()
+        .store_uint(0x18, 6)             ;; int_msg_info: ihr_disabled=1, bounce=1
+        .store_slice(collection_addr)
+        .store_coins(storage_coins() + transfer_fee())    ;; ≈0.07 TON на газ/хранение
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)  ;; body-ref = 1
+        .store_ref(mint_body)
+        .end_cell();
 
-        if (value != 0) {
-                send_raw_message(msg, 1);
-        }
+    ;; 2. payload «выдан приз» (для UI)
+    var ui_pl = begin_cell()
+        .store_uint(op::send_prize(), 32)
+        .store_uint(prize_code, 8)
+        .end_cell();
 
-	send_raw_message(deploy_message, 1);
+    ;; 3. Jetton-transfer игроку (TEP-74)
+    var jet_body = begin_cell()
+        .store_uint(op::jetton_transfer(), 32)
+        .store_uint(0, 64)
+        .store_coins(prize * jetton_decimals())
+        .store_slice(player)
+        .store_slice(my_address())
+        .store_uint(0, 1)
+        .store_coins(forward_fee())   ;; 0.05 TON
+        .store_uint(1, 1)
+        .store_ref(ui_pl)
+        .end_cell();
+
+    var jet_msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(token_wallet)
+        .store_coins(outer_fee())     ;; 0.15 TON
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_ref(jet_body)
+        .end_cell();
+
+    ;; 4. отправляем
+    if (prize != 0) {
+        send_raw_message(jet_msg, 1);   ;; Jetton → игрок
+    }
+    send_raw_message(nft_msg, 1);       ;; NFT   → игрок
 }
-

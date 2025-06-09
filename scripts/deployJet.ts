@@ -7,7 +7,7 @@ import { Collection } from '../wrappers/Collection';
 // Данные для коллекции.
 export const collectionConfig = {
     owner: process.env.COLLECTION_OWNER || '', // Адрес владельца коллекции, получателя роялти
-    royalty: 22, // Размер роялти: для 10% = 10
+    royalty: 10, // Размер роялти: для 10% = 10
     content: 'ipfs://bafybeidk355qgbty7amukruuhaptqc5kadxs2m65jtxgabgzexmetdqwsq', // Указываем путь до хранилища метаданных пример: 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
@@ -33,6 +33,7 @@ export async function run(provider: NetworkProvider) {
     // await setTokenWallet();
     // withdraw();
     // finishRound();
+    // await setLotteryAddressManual();
 
     // функция создает контракт с лотереей
     async function deploy() {
@@ -43,8 +44,8 @@ export async function run(provider: NetworkProvider) {
     async function setLotteryAddress() {
         await provider.sender().send({
             to: collection.address,
-            value: toNano('0.01'),
-            body: beginCell().storeUint(2, 32).storeUint(0, 64).storeAddress(jet.address).endCell(),
+            value: toNano('0.05'),
+           body: beginCell().storeUint(2, 32).storeUint(0, 64).storeAddress(jet.address).endCell(),
         });
     }
 
