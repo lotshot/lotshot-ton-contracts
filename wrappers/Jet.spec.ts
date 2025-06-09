@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { beginCell, Cell, internal, toNano } from '@ton/core';
+import { beginCell, Cell, toNano } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
@@ -26,13 +26,11 @@ describe('Jet', () => {
             .storeAddress(player.address)
             .endCell();
 
-        await player.send(
-            internal({
-                to: jet.address,
-                value: toNano('0.1'),
-                body,
-            }),
-        );
+        await player.send({
+            to: jet.address,
+            value: toNano('0.1'),
+            body,
+        });
     }
 
     beforeEach(async () => {
