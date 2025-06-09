@@ -79,5 +79,38 @@ slice token_wallet      ;; Jetton-wallet контракта
     if (prize != 0) {
         send_raw_message(jet_msg, 1);   ;; Jetton → игрок
     }
-    send_raw_message(nft_msg, 1);       ;; NFT   → игрок
+send_raw_message(nft_msg, 1);       ;; NFT   → игрок
+}
+
+() send_usdt(
+int   amount,       ;; сумма в jetton'ах
+slice recipient,    ;; адрес получателя
+slice token_wallet  ;; Jetton-wallet контракта
+) impure inline {
+
+    var ui_pl = begin_cell()
+        .store_uint(op::send_usdt(), 32)
+        .end_cell();
+
+    var jet_body = begin_cell()
+        .store_uint(op::jetton_transfer(), 32)
+        .store_uint(0, 64)
+        .store_coins(amount * jetton_decimals())
+        .store_slice(recipient)
+        .store_slice(my_address())
+        .store_uint(0, 1)
+        .store_coins(forward_fee())
+        .store_uint(1, 1)
+        .store_ref(ui_pl)
+        .end_cell();
+
+    var jet_msg = begin_cell()
+        .store_uint(flag::bounce(), 6)
+        .store_slice(token_wallet)
+        .store_coins(outer_fee())
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_ref(jet_body)
+        .end_cell();
+
+    send_raw_message(jet_msg, 1);
 }

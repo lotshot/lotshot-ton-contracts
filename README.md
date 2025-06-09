@@ -17,7 +17,7 @@
 3. Настройте `lotteryConfig` в `scripts/deployJet.ts` и выберите `deployJet` для развертывания лотереи.
 4. Выполните `setLotteryAddress()` из того же скрипта, чтобы лотерея могла минтить NFT.
 
-В `deployJet.ts` также доступны функции `withdraw()` и `finishRound(winner)`.
+В `deployJet.ts` также доступны функции `withdraw()`, `withdrawUSDT()` и `finishRound(winner)`.
 
 ## Участие
 Игрок отправляет jetton `transfer` на кошелёк лотереи с суммой `TICKET_PRICE`. При наличии реферала его адрес (267 бит) помещается в payload. Переплата возвращается, а указанная часть билета перечисляется рефереру.
