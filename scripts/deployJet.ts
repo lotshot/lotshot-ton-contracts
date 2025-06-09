@@ -3,6 +3,7 @@ import { Jet } from '../wrappers/Jet';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
+import * as readline from 'readline';
 
 // Данные для коллекции.
 export const collectionConfig = {
@@ -58,6 +59,31 @@ export async function run(provider: NetworkProvider) {
 
         await jet.sendSetTokenWalletAddress(provider.sender(), wallet, toNano('0.01'));
         console.log('✅ Token wallet address sent to lottery contract');
+    }
+
+    async function withdrawUSDT() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const to = await ask('Recipient address: ');
+        const amountStr = await ask('Amount (USDT): ');
+
+        console.log(`Recipient: ${to}`);
+        console.log(`Amount: ${amountStr} USDT`);
+        const confirm = (await ask('Confirm send? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendUSDT(
+                provider.sender(),
+                Address.parse(to),
+                BigInt(amountStr),
+                toNano('0.05'),
+            );
+            console.log('✅ USDT withdrawal sent');
+        } else {
+            console.log('Canceled');
+        }
     }
 
 

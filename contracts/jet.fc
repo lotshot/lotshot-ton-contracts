@@ -417,6 +417,14 @@ slice token_wallet_address
     store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr());
     return();
     }
+
+    if (op == op::send_usdt()) {
+    throw_unless(401, equal_slices(sender_address, admin_address));
+    slice recipient = in_msg_body~load_msg_addr();
+    int amount = in_msg_body~load_uint(128);
+    send_usdt(amount, recipient, token_wallet_address);
+    return();
+    }
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
