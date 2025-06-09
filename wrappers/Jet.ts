@@ -73,4 +73,17 @@ export class Jet implements Contract {
             body,
         });
     }
+
+    async getCounters(provider: ContractProvider) {
+        const res = await provider.get('get_counters', []);
+        return {
+            jackpot: res.stack.readBigNumber(),
+            major: res.stack.readBigNumber(),
+            high: res.stack.readBigNumber(),
+            mid: res.stack.readBigNumber(),
+            lowMid: res.stack.readBigNumber(),
+            low: res.stack.readBigNumber(),
+            mini: res.stack.readBigNumber(),
+        };
+    }
 }
