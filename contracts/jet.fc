@@ -103,7 +103,7 @@
 		}
 
 		if (x == 0) { ;; Выпал 0
-			if (jp > 0) { ;; Jack pot еще не был разыгран
+			if (jp == 0) { ;; Jack pot еще не был разыгран
 				next_ticket_index += 1;
 				 jp += 1;
 				cell new_ref = begin_cell()

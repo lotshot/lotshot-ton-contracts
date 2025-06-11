@@ -1,9 +1,11 @@
+int workchain()       asm "0 PUSHINT";
 
-int workchain() asm "0 PUSHINT";
+slice null_addr()     asm "b{00} PUSHSLICE";
+int   flag::regular() asm "0x10 PUSHINT";
+int   flag::bounce()  asm "0x8 PUSHINT";
 
-slice null_addr() asm "b{00} PUSHSLICE";
-int flag::regular() asm "0x10 PUSHINT";
-int flag::bounce() asm "0x8 PUSHINT";
-int mint_fee() asm "50000000 PUSHINT"; ;; 0.15 TON is too large, try set 0.05 TON
-int storage_coins() asm "20000000 PUSHINT"; ;; 0.02 TON
-int transfer_fee() asm "70000000 PUSHINT"; ;; 0.05 TON (maybe 0.07 TON is too small)
+;;--- комиссии и депозиты ---
+
+int transfer_fee()  asm "30000000 PUSHINT";  ;; 0.03 TON — value Jet → Collection
+int storage_coins() asm "20000000 PUSHINT";  ;; 0.02 TON — депозит в NFT-Item
+int mint_fee()      asm "25000000 PUSHINT";  ;; 0.025 TON — value внутри deploy-NFT

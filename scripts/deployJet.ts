@@ -16,14 +16,14 @@ export async function run(provider: NetworkProvider) {
     const lotteryConfig = {
         collectionAddress: collection.address, // Адрес коллекции будет взят автоматически
         adminAddress: process.env.ADMIN_ADDRESS || '', // Адрес админа для лотереи
-        price: 0.03, //Цена билета
+        price: 0.25, //Цена билета
         refPercent: Number(process.env.REF_PERCENT || '0'), // комиссия в базисных пунктах
     };
 
     const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
 
-    //await deploy();
-    await setLotteryAddress();
+    // await deploy();
+     await setLotteryAddress();
     // withdraw();
     // finishRound();
     // changeAdminAddress();
