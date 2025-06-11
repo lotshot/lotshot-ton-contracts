@@ -89,7 +89,7 @@
                 var x = rand(12000);
 
 		slice counters_slice = counters_ref.begin_parse();
-		
+
 		int jp = counters_slice~load_uint(16);
 		int x200 = counters_slice~load_uint(16);
 		int x77 = counters_slice~load_uint(16);
@@ -105,7 +105,7 @@
 		if (x == 0) { ;; Выпал 0
 			if (jp > 0) { ;; Jack pot еще не был разыгран
 				next_ticket_index += 1;
-				;; jp += 1;
+				 jp += 1;
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -116,10 +116,12 @@
 					.store_uint(x1, 16)
 					.end_cell();
 
+				var jp_prize = ticket_value * 3333;
+
 				var msg = begin_cell()
 					.store_uint(0x10, 6)
 					.store_slice(admin_address)
-					.store_coins(10000000)
+					.store_coins(jp_prize)
 					.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
 					.store_uint(0, 32)
 					.store_slice("Jackpot winner")
@@ -127,9 +129,9 @@
 
 
 				send_raw_message(msg, 1);
-				
 
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                   store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+
 				return();
 
 				;; Отправить сообщение админу
@@ -171,7 +173,7 @@
 					.end_cell();
                                 store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
 				return();
-			}		
+			}
 		}
 
 		if (x < 64) {
@@ -190,7 +192,7 @@
 					.end_cell();
                                 store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
 				return();
-			}		
+			}
 		}
 
 		if (x < 214) {
@@ -209,7 +211,7 @@
 					.end_cell();
                                 store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
 				return();
-			}		
+			}
 		}
 
 		if (x < 514) {
@@ -228,10 +230,10 @@
 					.end_cell();
                                 store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
 				return();
-			}		
+			}
 		}
 
-		if (x < 1714) {			
+		if (x < 1714) {
 			if (x1 < 1200) {
 				next_ticket_index += 1;
 				x1 += 1;
@@ -247,7 +249,7 @@
 					.end_cell();
                                 store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
 				return();
-			}		
+			}
 		}
 
 		next_ticket_index += 1;
@@ -259,7 +261,7 @@
 	int op = in_msg_body~load_uint(32);
 	int query_id = in_msg_body~load_uint(64);
 
-	
+
 	if (op == 2) { ;; withdrawal
 		throw_unless(401, equal_slices(sender_address, admin_address));
 		throw_unless(403, my_balance > 50000000); ;; 0.05 TON
@@ -270,12 +272,12 @@
 			.store_coins(my_balance - 50000000)
 			.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
 			.store_uint(0, 32)
-			.store_slice("Вывод средств для админа")
+			.store_slice("Contract fund reallocation")
 			.end_cell();
 
 		send_raw_message(msg, 1);
 		return();
-	};
+	}
 
 	if (op == 3) { ;; change_admin_address
 		throw_unless(401, equal_slices(sender_address,admin_address));
@@ -296,7 +298,7 @@
 (int, int, int, int, int, int, int) get_counters() method_id {
         (cell counters_ref, _, _, _, _, _) = load_data();
 
-	slice counters_slice = counters_ref.begin_parse();	
+	slice counters_slice = counters_ref.begin_parse();
 		int jp = counters_slice~load_uint(16);
 		int x200 = counters_slice~load_uint(16);
 		int x77 = counters_slice~load_uint(16);

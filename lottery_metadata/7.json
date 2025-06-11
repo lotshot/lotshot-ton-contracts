@@ -1,15 +1,15 @@
 {
-    "name": "Lotshot Participant NFT Season 1",
+    "name": "Lotshot Participant NFT Season 1 (TON)",
     "description": "Thank you for participating!",
-    "image": "ipfs://bafybeihwenvufvwmx5wzxwzuctqtitgiehno2mlnpdjxsujwaoolh5yjua/0.png",
+    "image": "ipfs://bafybeig3u4e53poerduizhxhzppviaw6fzl2ho4riwb7wodiwcj5x3g77e/x0.png",
     "attributes": [
     {
       "trait_type": "Winning Amount",
-      "value": "0 USDT"
+      "value": "x0"
     },
     {
       "trait_type": "Reward Level",
       "value": "Try Again"
     }
   ]
-} 
+}

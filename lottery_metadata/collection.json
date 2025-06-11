@@ -1,6 +1,9 @@
 {
-    "name": "Lotshot Season 1",
-    "description": "Transparent NFT Lottery with Instant Wins",
+    "name": "Lotshot Season 1 (TON)",
+    "description": "Transparent NFT Lottery with Instant Wins. Powered by TON with native token flow.",
+    "image": "https://bafybeig3u4e53poerduizhxhzppviaw6fzl2ho4riwb7wodiwcj5x3g77e.ipfs.w3s.link/Collection-Avatar-TON-512x512.jpg",
+    "cover_image": "https://bafybeig3u4e53poerduizhxhzppviaw6fzl2ho4riwb7wodiwcj5x3g77e.ipfs.w3s.link/Collection-Cover-TON-2880x680.jpg",
+    "external_url": "https://lotshot.io/",
     "social_links": [
         "https://www.facebook.com/groups/lotshot",
         "https://t.me/lotshot_official",
@@ -9,6 +12,12 @@
         "https://x.com/lotshot_x",
         "https://medium.com/@lotshot"
     ],
-    "image": "https://bafybeiafavcnmrv2pslq55lxckjww6so7lgflxisv4jvbcxjk373tcxoge.ipfs.w3s.link/Collection%20Avatar-512x512.jpg",
-    "cover_image": "https://bafybeiafavcnmrv2pslq55lxckjww6so7lgflxisv4jvbcxjk373tcxoge.ipfs.w3s.link/Collection-Cover-2880x680.jpg"
+    "creator": "Lotshot Team",
+    "category": "Lottery",
+    "tags": ["TON", "Lottery", "NFT", "Games", "Transparent", "On-chain"],
+    "blockchain": "TON",
+    "token_standard": "TIP-4",
+    "mint_date": "2025-06-15T00:00:00Z",
+    "payout_currency": "TON",
+    "supply": 12000
 }

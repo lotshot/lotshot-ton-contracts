@@ -1,11 +1,11 @@
 {
-    "name": "Lotshot Winner NFT Season 1",
+    "name": "Lotshot Winner NFT Season 1 (TON)",
     "description": "Congrats with Jackpot winning!",
-    "image": "ipfs://bafybeihwenvufvwmx5wzxwzuctqtitgiehno2mlnpdjxsujwaoolh5yjua/10000.png",
+    "image": "ipfs://bafybeig3u4e53poerduizhxhzppviaw6fzl2ho4riwb7wodiwcj5x3g77e/x3333.png",
      "attributes": [
     {
       "trait_type": "Winning Amount",
-      "value": "10000 USDT"
+      "value": "x3333"
     },
     {
       "trait_type": "Reward Level",
@@ -13,4 +13,4 @@
     }
   ]
 }
- 
+
