@@ -32,9 +32,15 @@ export async function run(provider: NetworkProvider) {
     // await deploy();
     // await setLotteryAddress();
     // await setTokenWallet();
-    // withdraw();
+
+
+    // await withdraw();     // Вывод TON на адрес админа
+    // await withdrawUSDT(); // Вывод USDT на произвольный адрес
+
+
     // finishRound();
-    // await setLotteryAddressManual();
+
+
 
     // функция создает контракт с лотереей
     async function deploy() {
@@ -78,7 +84,7 @@ export async function run(provider: NetworkProvider) {
                 provider.sender(),
                 Address.parse(to),
                 BigInt(amountStr),
-                toNano('0.05'),
+                toNano('0.1'),
             );
             console.log('✅ USDT withdrawal sent');
         } else {
