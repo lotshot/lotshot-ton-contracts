@@ -19,7 +19,7 @@ export async function run(provider: NetworkProvider) {
         collectionAddress: collection.address, // Collection address will be inserted automatically
         adminAddress: process.env.ADMIN_ADDRESS || '', // Admin address for the lottery
         price: BigInt(process.env.TICKET_PRICE || '10000000'), // Ticket cost in jettons
-        refPercent: Number(process.env.REF_PERCENT || '0'), // Fee in basis points
+        refPercent: Number(process.env.REF_PERCENT || '0'), // Fee in %
         tokenAddress: Address.parse('0:0000000000000000000000000000000000000000000000000000000000000000'),
     };
 
