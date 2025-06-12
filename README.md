@@ -1,6 +1,8 @@
 # Lotshot Smart Contracts
 
-This repository contains the smart contracts and helper scripts used to run the Lotshot lottery on the TON blockchain. The contracts are written in FunC and can deploy an NFT collection together with a lottery that distributes jetton prizes.
+Lotshot is a decentralized lottery running entirely on the TON blockchain. The smart contracts are written in FunC and managed through a TypeScript tooling stack. Together they deploy an NFT collection and handle a lottery where prizes are paid out in jettons.
+
+The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. When the jackpot tier is hit, no new tickets are accepted until the round is finished.
 
 ## Setup
 1. Run `npm install` to install the project dependencies.
@@ -18,6 +20,9 @@ This repository contains the smart contracts and helper scripts used to run the 
 4. From the same script run `setLotteryAddress()` so the lottery contract can mint NFTs.
 
 The `deployJet.ts` script also exposes `withdraw()`, `withdrawUSDT()` and `finishRound(winner)` for administrative actions.
+
+## NFT Collection
+The lottery issues unique NFTs for every prize tier. Metadata for each token can be found in the `lottery_metadata` directory and is pinned to IPFS. The collection is deployed once and the lottery contract mints the appropriate token when a player wins.
 
 ## Participation
 Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_PRICE`. If you have a referrer, include the 267‑bit address inside the payload. Any overpayment is returned and the referral share is sent to the referrer.
@@ -43,28 +48,15 @@ Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_
 5. The contract must always keep at least 0.05 TON and enough jettons for future payouts.
 6. When sending a ticket, store your TON wallet address first in `forward_payload`, followed by an optional referrer address. Set `forward_ton_amount` to at least `0.27` TON.
 
-## Example Ticket Transfer
-```tsx
-import { beginCell, Address } from '@ton/core';
+## Technology Stack
+- **FunC** for smart contracts
+- **TypeScript** scripts and tests
+- **@ton/blueprint** and **ton-sandbox** for local development
+- **Jetton** token standard for ticket payments
 
-const referral = undefined as string | undefined;
+## TON Blockchain
+Lotshot leverages the speed and low fees of The Open Network. Transactions are transparent and immutable, and NFTs are issued directly on-chain.
 
-const forwardPayloadBuilder = beginCell().storeAddress(userWallet); // player wallet
-if (referral) {
-  forwardPayloadBuilder.storeAddress(Address.parse(referral));
-}
-const forwardPayload = forwardPayloadBuilder.endCell();
+## License
+This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-const payload = beginCell()
-  .storeUint(0xf8a7ea5, 32)
-  .storeUint(0, 64)
-  .storeCoins(BigInt(process.env.TICKET_PRICE!))
-  .storeAddress(Address.parse(lotteryWallet))
-  .storeAddress(userWallet)
-  .storeBit(0)
-  .storeCoins(toNano('0.27'))
-  .storeRef(forwardPayload)
-  .endCell();
-```
-
-Send a `transfer` with this payload from your wallet to participate in the lottery.
