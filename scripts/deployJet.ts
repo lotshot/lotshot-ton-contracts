@@ -6,7 +6,7 @@ import { Collection } from '../wrappers/Collection';
 // Данные для коллекции.
 export const collectionConfig = {
     owner: process.env.COLLECTION_OWNER || '', // Адрес владельца коллекции, получателя роялти
-    royalty: 10, // Размер роялти: для 10% = 10
+    royalty: 10, // Размер роялти: для 10% = 10 (20 для Тестнета)
     content: 'ipfs://bafybeiejvmv4eduvtomgsxcg2nqmoob6423nwt2krmuc6xk6seyjev3hvu', // Указываем путь до хранилища метаданных пример: 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
@@ -23,8 +23,8 @@ export async function run(provider: NetworkProvider) {
     const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
 
     // await deploy();
-     await setLotteryAddress();
-    // withdraw();
+    // await setLotteryAddress();
+    await withdraw();
     // finishRound();
     // changeAdminAddress();
 
