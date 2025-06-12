@@ -1,5 +1,10 @@
 # Lotshot Smart Contracts
 
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![TON Blockchain](https://img.shields.io/badge/Made%20on-TON-blue?logo=ton&style=flat-square)
+
+> Made with ❤️ on [TON](https://ton.org) Blockchain
+
 Lotshot is a decentralized lottery running entirely on the TON blockchain. The smart contracts are written in FunC and managed through a TypeScript tooling stack. Together they deploy an NFT collection and handle a lottery where prizes are paid out in jettons.
 
 The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. When the jackpot tier is hit, no new tickets are accepted until the round is finished.
@@ -59,4 +64,11 @@ Lotshot leverages the speed and low fees of The Open Network. Transactions are t
 
 ## License
 This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
+## 🔗 Links
 
+- 🌐 [Website](https://lotshot.io)
+- 🐦 [Twitter / X](https://x.com/lotshot_x)
+- 📣 [Telegram](https://t.me/lotshot_official)
+- 📝 [Medium](https://medium.com/@lotshot)
+
+Made with ❤️ by the Lotshot team • Built for the TON ecosystem.
