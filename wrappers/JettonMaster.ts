@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------------
- *  JettonMaster wrapper (TIP-3.1) – минимально-достаточный для деплоя
- *  и тестов USDT-Jetton’ом.
+ *  JettonMaster wrapper (TIP-3.1) – simple helper for deploying
+ *  and testing the USDT Jetton.
  * ------------------------------------------------------------------------*/
 
 import {
@@ -15,18 +15,18 @@ import {
 } from '@ton/core';
 
 /* ------------------------------------------------------------------ */
-/*  CONFIG  → init-data (нужно только для sandbox-тестов)            */
+/*  CONFIG  → init data (only for sandbox tests)                     */
 /* ------------------------------------------------------------------ */
 export type JettonMasterConfig = {
-    admin: Address;   // владелец мастера / минтер
-    content: Cell;    // off-chain контент (IPFS/JSON)
-    symbol: string;   // «USDT»
+    admin: Address;   // master owner / minter
+    content: Cell;    // off-chain content (IPFS/JSON)
+    symbol: string;   // "USDT"
     decimals: number; // 6
 };
 
 export function jettonMasterConfigToCell(cfg: JettonMasterConfig): Cell {
     return beginCell()
-        .storeUint(0, 2)                 // пустая опция (00)
+        .storeUint(0, 2)                 // empty option (00)
         .storeAddress(cfg.admin)
         .storeRef(cfg.content)
         .storeUint(cfg.decimals, 8)
@@ -43,12 +43,12 @@ export class JettonMaster implements Contract {
         readonly init?: { code: Cell; data: Cell },
     ) {}
 
-    /* открыть уже деплоенный мастер */
+    /* open already deployed master */
     static createFromAddress(addr: Address) {
         return new JettonMaster(addr);
     }
 
-    /* сформировать init-структуру (sandbox) */
+    /* create init data (sandbox) */
     static createFromConfig(
         cfg: JettonMasterConfig,
         code: Cell,
@@ -59,7 +59,7 @@ export class JettonMaster implements Contract {
         return new JettonMaster(contractAddress(workchain, init), init);
     }
 
-    /* -----------------  DEPLOY  (для тестовой среды)  -------------- */
+    /* -----------------  DEPLOY  (for tests)  ----------------------- */
     async sendDeploy(
         provider: ContractProvider,
         via: Sender,
@@ -68,7 +68,7 @@ export class JettonMaster implements Contract {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().endCell(), // пустой body
+            body: beginCell().endCell(), // empty body
         });
     }
 
@@ -97,7 +97,7 @@ export class JettonMaster implements Contract {
         await provider.internal(via, { value, body });
     }
 
-    /* ---------------- MINT (для e2e-тестов) ------------------------ */
+    /* ---------------- MINT (for e2e tests) ------------------------ */
 async mint(
     provider: ContractProvider,
     via: Sender,
@@ -105,14 +105,14 @@ async mint(
     amount: bigint,
 ) {
     const body = beginCell()
-        .storeUint(21, 32)        // op-код mint (произвольный)
+        .storeUint(21, 32)        // mint opcode (arbitrary)
         .storeUint(0, 64)
         .storeAddress(walletAddr)
         .storeUint(amount, 128)
     .endCell();
 
     await provider.internal(via, {
-        value: 100_000_000n,      // 0.1 TON  (bigint!)
+        value: 100_000_000n,      // 0.1 TON (bigint!)
         sendMode: SendMode.PAY_GAS_SEPARATELY,
         body,
     });
