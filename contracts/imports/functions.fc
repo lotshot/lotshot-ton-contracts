@@ -20,41 +20,41 @@ cell generate_nft_content(int value, slice owner) {
 }
 
 () send_winning(
-int   prize,            ;; сумма приза в jetton’ах
-slice player,           ;; адрес игрока
+int   prize,            ;; prize amount in jettons
+slice player,           ;; player address
 int   prize_code,       ;; 0..7
 slice collection_addr,  ;; NFT-collection
-int   content_id,       ;; уникальный ID (можно next_ticket)
-slice token_wallet      ;; Jetton-wallet контракта
+int   content_id,       ;; unique ID (can use next_ticket)
+slice token_wallet      ;; contract's Jetton wallet
 ) impure inline {
 
-    ;; 1. NFT-контент
+    ;; 1. NFT content
     cell nft_content = generate_nft_content(content_id, player);
 
-    ;; body для коллекции: op-1, query-0, ref, mint_fee
+    ;; body for the collection: op=1, query=0, ref, mint_fee
     var mint_body = begin_cell()
         .store_uint(1, 32)          ;; op = 1
         .store_uint(0, 64)          ;; query_id
-        .store_ref(nft_content)     ;; индивидуальный JSON
-        .store_coins(mint_fee())    ;; ← то, чего не хватало!
+        .store_ref(nft_content)     ;; individual JSON
+        .store_coins(mint_fee())    ;; ← that's what was missing!
         .end_cell();
 
-    ;; внутр.-сообщение в коллекцию
+    ;; internal message to the collection
     var nft_msg = begin_cell()
         .store_uint(0x18, 6)             ;; int_msg_info: ihr_disabled=1, bounce=1
         .store_slice(collection_addr)
-        .store_coins(storage_coins() + transfer_fee())    ;; ≈0.07 TON на газ/хранение
+        .store_coins(storage_coins() + transfer_fee())    ;; about 0.07 TON for gas/storage
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)  ;; body-ref = 1
         .store_ref(mint_body)
         .end_cell();
 
-    ;; 2. payload «выдан приз» (для UI)
+    ;; 2. "prize sent" payload (for UI)
     var ui_pl = begin_cell()
         .store_uint(op::send_prize(), 32)
         .store_uint(prize_code, 8)
         .end_cell();
 
-    ;; 3. Jetton-transfer игроку (TEP-74)
+    ;; 3. Jetton transfer to the player (TEP-74)
     var jet_body = begin_cell()
         .store_uint(op::jetton_transfer(), 32)
         .store_uint(0, 64)
@@ -75,17 +75,17 @@ slice token_wallet      ;; Jetton-wallet контракта
         .store_ref(jet_body)
         .end_cell();
 
-    ;; 4. отправляем
+    ;; 4. send
     if (prize != 0) {
-        send_raw_message(jet_msg, 1);   ;; Jetton → игрок
+        send_raw_message(jet_msg, 1);   ;; Jetton → player
     }
-send_raw_message(nft_msg, 1);       ;; NFT   → игрок
+send_raw_message(nft_msg, 1);       ;; NFT   → player
 }
 
 () send_usdt(
-int   amount,       ;; сумма в jetton'ах
-slice recipient,    ;; адрес получателя
-slice token_wallet  ;; Jetton-wallet контракта
+int   amount,       ;; amount in jettons
+slice recipient,    ;; recipient address
+slice token_wallet  ;; contract's Jetton wallet
 ) impure inline {
 
     var ui_pl = begin_cell()
