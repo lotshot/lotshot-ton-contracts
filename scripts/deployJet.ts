@@ -6,7 +6,7 @@ import { Collection } from '../wrappers/Collection';
 // Collection parameters
 export const collectionConfig = {
     owner: process.env.COLLECTION_OWNER || '', // wallet that receives royalties
-    royalty: 10, // royalty rate: 10% = 10 (use 20 for testnet)
+    royalty: 10, // royalty rate: 10% = 10
     content: 'ipfs://bafybeiejvmv4eduvtomgsxcg2nqmoob6423nwt2krmuc6xk6seyjev3hvu', // path to metadata storage, e.g. 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
@@ -24,7 +24,7 @@ export async function run(provider: NetworkProvider) {
 
     // await deploy();
     // await setLotteryAddress();
-    await withdraw();
+    // await withdraw();
     // finishRound();
     // changeAdminAddress();
 
