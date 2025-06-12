@@ -5,21 +5,21 @@ import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
 import * as readline from 'readline';
 
-// Данные для коллекции.
+// Collection parameters.
 export const collectionConfig = {
-    owner: process.env.COLLECTION_OWNER || '', // Адрес владельца коллекции, получателя роялти
-    royalty: 10, // Размер роялти: для 10% = 10
-    content: 'ipfs://bafybeidk355qgbty7amukruuhaptqc5kadxs2m65jtxgabgzexmetdqwsq', // Указываем путь до хранилища метаданных пример: 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
+    owner: process.env.COLLECTION_OWNER || '', // Collection owner address, receives royalties
+    royalty: 10, // Royalty size: 10 means 10%
+    content: 'ipfs://bafybeidk355qgbty7amukruuhaptqc5kadxs2m65jtxgabgzexmetdqwsq', // Path to metadata storage, e.g. 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
 export async function run(provider: NetworkProvider) {
     const collection = provider.open(Collection.createFromConfig(collectionConfig, await compile('Collection')));
 
     const lotteryConfig = {
-        collectionAddress: collection.address, // Адрес коллекции будет взят автоматически
-        adminAddress: process.env.ADMIN_ADDRESS || '', // Адрес админа для лотереи
-        price: BigInt(process.env.TICKET_PRICE || '10000000'), // цена билета в jetton
-        refPercent: Number(process.env.REF_PERCENT || '0'), // комиссия в базисных пунктах
+        collectionAddress: collection.address, // Collection address will be inserted automatically
+        adminAddress: process.env.ADMIN_ADDRESS || '', // Admin address for the lottery
+        price: BigInt(process.env.TICKET_PRICE || '10000000'), // Ticket cost in jettons
+        refPercent: Number(process.env.REF_PERCENT || '0'), // Fee in basis points
         tokenAddress: Address.parse('0:0000000000000000000000000000000000000000000000000000000000000000'),
     };
 
@@ -34,20 +34,20 @@ export async function run(provider: NetworkProvider) {
     // await setTokenWallet();
 
 
-    // await withdraw();     // Вывод TON на адрес админа
-    // await withdrawUSDT(); // Вывод USDT на произвольный адрес
+    // await withdraw();     // Withdraw TON to admin address
+    // await withdrawUSDT(); // Withdraw USDT to any address
 
 
     // finishRound();
 
 
 
-    // функция создает контракт с лотереей
+    // This function deploys the lottery contract
     async function deploy() {
         await jet.sendDeploy(provider.sender(), toNano('0.1'));
     }
 
-    // Транзакция выдаст право минта для лотерейного контракта
+    // The transaction grants mint permission to the lottery contract
     async function setLotteryAddress() {
         await provider.sender().send({
             to: collection.address,
@@ -56,7 +56,7 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Запишет адрес jetton-кошелька лотереи в контракт
+    // Writes the lottery jetton wallet address to the contract
     async function setTokenWallet() {
         const wallet = await jettonMaster.getWalletAddress(jet.address);
         console.log('📦 Jetton wallet address for lottery:', wallet.toString());
@@ -93,12 +93,12 @@ export async function run(provider: NetworkProvider) {
     }
 
 
-    // Выведет деньги с контракта лотереи. Баланс лотереи должен быть больше 0.05 TON
+    // Withdraws funds from the lottery contract. The balance must exceed 0.05 TON
     async function withdraw() {
         await jet.sendWithdraw(provider.sender(), toNano('0.01'));
     }
 
-    // Остановит работу лотерейного контракта. Также будет создан нфт для победителя
+    // Stops the lottery contract and mints an NFT for the winner
     async function finishRound(winner_address: string) {
         await jet.sendFinishRound(
             provider.sender(),
