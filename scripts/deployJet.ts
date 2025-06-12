@@ -7,7 +7,7 @@ import { Collection } from '../wrappers/Collection';
 export const collectionConfig = {
     owner: process.env.COLLECTION_OWNER || '', // wallet that receives royalties
     royalty: 10, // royalty rate: 10% = 10
-    content: 'ipfs://bafybeiejvmv4eduvtomgsxcg2nqmoob6423nwt2krmuc6xk6seyjev3hvu', // path to metadata storage, e.g. 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
+    content: 'ipfs://bafybeiat3wdd4rzuvlneugpx6tkrvlwor5nupox4dngjhjtifey6rxqcee', // path to metadata storage, e.g. 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
 export async function run(provider: NetworkProvider) {
