@@ -1,53 +1,49 @@
 # Lotshot Smart Contracts
 
-Репозиторий содержит смарт‑контракты на FunC и скрипты для запуска лотереи Lotshot в сети TON.
+This repository contains the smart contracts and helper scripts used to run the Lotshot lottery on the TON blockchain. The contracts are written in FunC and can deploy an NFT collection together with a lottery that distributes jetton prizes.
 
-## Установка
-1. `npm install`
-2. Скопируйте `.env.example` в `.env` и заполните параметры:
-   - `COLLECTION_OWNER` – владелец NFT‑коллекции;
-   - `ADMIN_ADDRESS` – кошелёк администратора лотереи;
-   - `TOKEN_ADDRESS` – jetton, используемый для оплаты билетов;
-   - `TICKET_PRICE` – стоимость билета в jetton;
-   - `REF_PERCENT` – процент для реферала (в б.п.).
+## Setup
+1. Run `npm install` to install the project dependencies.
+2. Copy `.env.example` to `.env` and edit the variables:
+   - `COLLECTION_OWNER` – address that owns the NFT collection.
+   - `ADMIN_ADDRESS` – wallet that manages the lottery.
+   - `TOKEN_ADDRESS` – jetton used to pay for lottery tickets.
+   - `TICKET_PRICE` – price of one ticket denominated in the jetton.
+   - `REF_PERCENT` – referral payout in basis points.
 
-## Деплой
-1. Подготовьте метаданные `collection.json` и `0.json–7.json`, загрузите их в IPFS и укажите ссылку в `collectionConfig.content`.
-2. Запустите `npm run start` и выберите `deployCollection` – будет создан контракт коллекции NFT.
-3. Настройте `lotteryConfig` в `scripts/deployJet.ts` и выберите `deployJet` для развертывания лотереи.
-4. Выполните `setLotteryAddress()` из того же скрипта, чтобы лотерея могла минтить NFT.
+## Deployment
+1. Prepare the metadata files `collection.json` and `0.json–7.json`, upload them to IPFS and place the resulting link into `collectionConfig.content`.
+2. Run `npm run start` and choose `deployCollection` to deploy the NFT collection contract.
+3. Adjust `lotteryConfig` in `scripts/deployJet.ts` and select `deployJet` to deploy the lottery contract.
+4. From the same script run `setLotteryAddress()` so the lottery contract can mint NFTs.
 
-В `deployJet.ts` также доступны функции `withdraw()`, `withdrawUSDT()` и `finishRound(winner)`.
+The `deployJet.ts` script also exposes `withdraw()`, `withdrawUSDT()` and `finishRound(winner)` for administrative actions.
 
-## Участие
-Игрок отправляет jetton `transfer` на кошелёк лотереи с суммой `TICKET_PRICE`. При наличии реферала его адрес (267 бит) помещается в payload. Переплата возвращается, а указанная часть билета перечисляется рефереру.
+## Participation
+Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_PRICE`. If you have a referrer, include the 267‑bit address inside the payload. Any overpayment is returned and the referral share is sent to the referrer.
 
-## Механика лотереи
-1. После получения платежа генерируется случайное число `x` в диапазоне от 0 до 1199 включительно.
-2. При `x == 0` контракт уведомляет администратора о потенциальном джекпоте. Админ вызывает `finishRound(address)`:
-   - игрок получает `JACKPOT_PRIZE` (10 000 jetton) и NFT `0`;
-   - счётчик джекпота увеличивается и новые билеты не принимаются.
-3. Иначе значение `x` сравнивается с диапазонами. Приз выдаётся, пока соответствующий счётчик меньше лимита.
-   Числа ниже рассчитаны на раунд из 1 200 билетов, что в десять раз меньше справочной таблицы
-   на 12 000 (`1, 3, 10, 50, 150, 300, 1190`).
+## Lottery Mechanics
+1. After receiving a payment, the contract generates a random number `x` from 0 to 1199.
+2. If `x == 0` the contract informs the administrator about a potential jackpot. The admin should call `finishRound(address)`:
+   - the player receives `JACKPOT_PRIZE` (10 000 jettons) and NFT `0`;
+   - the jackpot counter increases and no new tickets are accepted.
+3. Otherwise `x` is checked against the ranges below. A prize is issued while the associated counter is below its limit. The table assumes a round of 1 200 tickets (ten times smaller than the reference table for 12 000: `1, 3, 10, 50, 150, 300, 1190`).
 
-   | Диапазон `x`    | Лимит счётчика | Приз (jetton) | NFT |
-   |-----------------|---------------:|--------------:|----:|
-   | `x == 0`        | `jp < 1`       | 10 000        | 0 |
-   | `x < 2`         | `major < 1`    | 1 800         | 1 |
-   | `x < 3`         | `high < 1`     | 700           | 2 |
-   | `x < 8`         | `mid < 5`      | 180           | 3 |
-   | `x < 23`        | `low_mid < 15` | 50            | 4 |
-   | `x < 53`        | `low < 30`     | 25            | 5 |
-   | `x < 172`       | `mini < 119`   | 10            | 6 |
-   | иначе           | —              | 0             | 7 |
-4. После выдачи приза увеличивается один из счётчиков `jp`, `major`, `high`, `mid`, `low_mid`, `low`, `mini`,
-   фиксирующих количество розданных наград данного типа. Затем NFT минтится из коллекции,
-   а jetton переводится игроку.
-5. На контракте должно оставаться не менее 0.05 TON и достаточный запас jetton для будущих выплат.
-6. При отправке билета в `forward_payload` первым помещайте свой TON‑кошелёк, а после него при желании адрес реферала. В поле `forward_ton_amount` укажите не менее `0.27` TON.
+   | Range of `x` | Counter limit | Prize (jettons) | NFT |
+   |--------------|--------------:|---------------:|----:|
+   | `x == 0`     | `jp < 1`      | 10 000          | 0 |
+   | `x < 2`      | `major < 1`   | 1 800           | 1 |
+   | `x < 3`      | `high < 1`    | 700             | 2 |
+   | `x < 8`      | `mid < 5`     | 180             | 3 |
+   | `x < 23`     | `low_mid < 15`| 50              | 4 |
+   | `x < 53`     | `low < 30`    | 25              | 5 |
+   | `x < 172`    | `mini < 119`  | 10              | 6 |
+   | otherwise    | —             | 0               | 7 |
+4. After the prize is issued, one of the counters `jp`, `major`, `high`, `mid`, `low_mid`, `low`, `mini` is increased. The NFT is minted from the collection and the jetton prize is sent to the player.
+5. The contract must always keep at least 0.05 TON and enough jettons for future payouts.
+6. When sending a ticket, store your TON wallet address first in `forward_payload`, followed by an optional referrer address. Set `forward_ton_amount` to at least `0.27` TON.
 
-## Пример отправки билета
+## Example Ticket Transfer
 ```tsx
 import { beginCell, Address } from '@ton/core';
 
@@ -71,4 +67,4 @@ const payload = beginCell()
   .endCell();
 ```
 
-Отправьте `transfer` с этим payload через ваш кошелёк.
+Send a `transfer` with this payload from your wallet to participate in the lottery.
