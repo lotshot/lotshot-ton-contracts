@@ -4,8 +4,8 @@ slice null_addr()     asm "b{00} PUSHSLICE";
 int   flag::regular() asm "0x10 PUSHINT";
 int   flag::bounce()  asm "0x8 PUSHINT";
 
-;;--- комиссии и депозиты ---
+;;--- fees and deposits ---
 
 int transfer_fee()  asm "30000000 PUSHINT";  ;; 0.03 TON — value Jet → Collection
-int storage_coins() asm "20000000 PUSHINT";  ;; 0.02 TON — депозит в NFT-Item
-int mint_fee()      asm "25000000 PUSHINT";  ;; 0.025 TON — value внутри deploy-NFT
+int storage_coins() asm "20000000 PUSHINT";  ;; 0.02 TON — deposit for NFT-Item
+int mint_fee()      asm "25000000 PUSHINT";  ;; 0.025 TON — value used inside deploy-NFT

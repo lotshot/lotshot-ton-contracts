@@ -26,7 +26,7 @@ export function CollectionConfigToCell(config: CollectionConfig): Cell {
             beginCell()
             .storeUint(config.royalty * 10, 16)
             .storeUint(1000, 16)
-            .storeAddress(address) // Получатель роялти
+            .storeAddress(address) // royalty recipient
             .endCell()
         )
         .endCell();

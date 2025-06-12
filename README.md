@@ -2,6 +2,15 @@
 
 This repository contains smart contracts and TypeScript scripts for the Lotshot lottery on the TON blockchain. It includes deployment scripts, unit tests, and metadata examples.
 
+## Project structure
+
+- **contracts** – FunC sources for the lottery and NFT collection.
+- **wrappers** – TypeScript wrappers for interacting with contracts.
+- **scripts** – deployment and maintenance helpers.
+- **tests** – automated tests powered by Jest.
+
+`encodeOffchainContent.ts` contains utilities for preparing NFT metadata.
+
 ## Prerequisites
 
 - Node.js 20 or later
@@ -28,6 +37,16 @@ The `.env` file requires the following fields:
 - `COLLECTION_OWNER` – address that will receive NFT royalties.
 - `ADMIN_ADDRESS` – address of the lottery administrator.
 - `REF_PERCENT` – referral fee in basis points.
+
+## Compiling contracts
+
+Before running the scripts you may compile the FunC sources to ensure everything is up to date:
+
+```bash
+npm run build
+```
+
+This step uses `@ton/blueprint` to compile the contracts into binary code that can be deployed.
 
 ## Deploying the NFT Collection
 
@@ -59,6 +78,8 @@ Select `deployJet` and follow the prompts. Ensure you call `deploy()` and `setLo
 
 Function calls are commented out by default. Uncomment the desired call before running `npm run start`.
 
+Use `npm run start` to execute the script with [`ts-node`](https://github.com/TypeStrong/ts-node). The prompts will guide you through deployment and management actions.
+
 ## Participation
 
 To buy a ticket without a referrer, send the ticket price to the lottery contract with an empty body. If a referrer is involved, include their 267‑bit address in the message body when sending the payment. A portion of the ticket value, defined by `REF_PERCENT`, will automatically be transferred to the referrer.
@@ -74,3 +95,5 @@ npm test
 ## License
 
 This project is released under the MIT License.
+
+Contributions are welcome. Feel free to open issues or submit pull requests with improvements.
