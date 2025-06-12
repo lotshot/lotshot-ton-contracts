@@ -10,6 +10,8 @@ This repository contains smart contracts and TypeScript scripts for the Lotshot 
 - **tests** – automated tests powered by Jest.
 
 `encodeOffchainContent.ts` contains utilities for preparing NFT metadata.
+It converts off-chain links to cell chains so the contracts can store
+references on-chain.
 
 ## Prerequisites
 
@@ -83,6 +85,28 @@ Use `npm run start` to execute the script with [`ts-node`](https://github.com/Ty
 ## Participation
 
 To buy a ticket without a referrer, send the ticket price to the lottery contract with an empty body. If a referrer is involved, include their 267‑bit address in the message body when sending the payment. A portion of the ticket value, defined by `REF_PERCENT`, will automatically be transferred to the referrer.
+
+## Reward Tiers and Metadata
+
+When a ticket is processed the contract calls `randomize_lt()` and then
+`rand(12000)` to obtain a number between **0** and **11 999**. The result
+determines the reward level, provided that tier still has prizes left:
+
+| Range | Reward | Probability |
+|-------|--------|-------------|
+| 0 | Jackpot **x3333** | 1&nbsp;/&nbsp;12000 (0.0083%) |
+| 1–3 | **x200** | 3&nbsp;/&nbsp;12000 (0.025%) |
+| 4–13 | **x77** | 10&nbsp;/&nbsp;12000 (0.083%) |
+| 14–63 | **x20** | 50&nbsp;/&nbsp;12000 (0.4167%) |
+| 64–213 | **x7** | 150&nbsp;/&nbsp;12000 (1.25%) |
+| 214–513 | **x3** | 300&nbsp;/&nbsp;12000 (2.5%) |
+| 514–1713 | **x1** | 1200&nbsp;/&nbsp;12000 (10%) |
+
+Metadata describing each tier lives in the `lottery_metadata/` folder.
+`collection.json` defines the collection, while `0.json`–`7.json` correspond to
+the jackpot, prize tiers and a "Try Again" NFT. To start a new season update the
+names, images and links in these files and rebuild the cells using
+`encodeOffchainContent.ts`.
 
 ## Testing
 
