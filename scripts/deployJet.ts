@@ -3,21 +3,21 @@ import { Jet } from '../wrappers/Jet';
 import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
 
-// Данные для коллекции.
+// Collection parameters
 export const collectionConfig = {
-    owner: process.env.COLLECTION_OWNER || '', // Адрес владельца коллекции, получателя роялти
-    royalty: 10, // Размер роялти: для 10% = 10 (20 для Тестнета)
-    content: 'ipfs://bafybeiejvmv4eduvtomgsxcg2nqmoob6423nwt2krmuc6xk6seyjev3hvu', // Указываем путь до хранилища метаданных пример: 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
+    owner: process.env.COLLECTION_OWNER || '', // wallet that receives royalties
+    royalty: 10, // royalty rate: 10% = 10 (use 20 for testnet)
+    content: 'ipfs://bafybeiejvmv4eduvtomgsxcg2nqmoob6423nwt2krmuc6xk6seyjev3hvu', // path to metadata storage, e.g. 'ipfs://bafybeif2afmx74slkwx5iqzvjaa5hmmzwrx7i2po4sds3cv4ojx23kclyu'
 };
 
 export async function run(provider: NetworkProvider) {
     const collection = provider.open(Collection.createFromConfig(collectionConfig, await compile('Collection')));
 
     const lotteryConfig = {
-        collectionAddress: collection.address, // Адрес коллекции будет взят автоматически
-        adminAddress: process.env.ADMIN_ADDRESS || '', // Адрес админа для лотереи
-        price: 0.25, //Цена билета
-        refPercent: Number(process.env.REF_PERCENT || '0'), // комиссия в базисных пунктах
+        collectionAddress: collection.address, // collection address filled automatically
+        adminAddress: process.env.ADMIN_ADDRESS || '', // lottery administrator address
+        price: 0.25, // ticket price
+        refPercent: Number(process.env.REF_PERCENT || '0'), // referral fee in basis points
     };
 
     const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
@@ -28,12 +28,12 @@ export async function run(provider: NetworkProvider) {
     // finishRound();
     // changeAdminAddress();
 
-    // функция создает контракт с лотереей
+    // Deploy the lottery contract
     async function deploy() {
         await jet.sendDeploy(provider.sender(), toNano('0.1'));
     }
 
-    // Транзакция выдаст право минта для лотерейного контракта
+    // Grant minting rights to the lottery contract
     async function setLotteryAddress() {
         await provider.sender().send({
             to: collection.address,
@@ -42,7 +42,7 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Выведет деньги с контракта лотереи. Баланс лотереи должен быть больше 0.05 TON
+    // Withdraw funds from the lottery contract. Balance must exceed 0.05 TON
     async function withdraw() {
         await provider.sender().send({
             to: jet.address,
@@ -51,7 +51,7 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Остановит работу лотерейного контракта. Также будет создан нфт для победителя
+    // Stop the lottery contract and mint an NFT for the winner
     async function finishRound(winner_address: string) {
         await provider.sender().send({
             to: jet.address,
@@ -60,7 +60,7 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Изменит адрес администратора лотереи
+    // Change the lottery administrator
     async function changeAdminAddress(new_admin: string) {
         await provider.sender().send({
             to: jet.address,

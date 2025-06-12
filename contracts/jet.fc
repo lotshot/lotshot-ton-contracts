@@ -102,8 +102,8 @@
 			return();
 		}
 
-		if (x == 0) { ;; Выпал 0
-			if (jp == 0) { ;; Jack pot еще не был разыгран
+                if (x == 0) { ;; rolled 0
+                        if (jp == 0) { ;; jackpot has not been drawn yet
 				next_ticket_index += 1;
 				 jp += 1;
 				cell new_ref = begin_cell()
@@ -134,12 +134,12 @@
 
 				return();
 
-				;; Отправить сообщение админу
+                                ;; notify administrator
 			}
 		}
 
-		if (x < 4) { ;; выпало до 4
-			if (x200 < 3) { ;; Выигрышей x200 меньше 3
+                if (x < 4) { ;; rolled under 4
+                        if (x200 < 3) { ;; less than 3 x200 wins
 				x200 += 1;
 				next_ticket_index += 1;
                                 send_winning(ticket_value * 200, sender_address, "x200", collection_address, 1);
@@ -288,8 +288,8 @@
 	if (op == 4) { ;; send nft to jackpot winner
 		throw_unless(401, equal_slices(sender_address, admin_address));
 		send_winning(0, in_msg_body~load_msg_addr(), "text", collection_address, 0);
-		;; блок контракта
-		;; дописать с load_data
+                ;; contract block
+                ;; to be finished with load_data
 		;; jp += 1;
 		return();
 	}
