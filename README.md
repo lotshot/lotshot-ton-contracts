@@ -94,7 +94,7 @@ determines the reward level, provided that tier still has prizes left:
 
 | Range | Reward | Probability |
 |-------|--------|-------------|
-| 0 | Jackpot **x3333** | 1&nbsp;/&nbsp;12000 (0.0083%) |
+| 0 | Jackpot **x1000** | 1&nbsp;/&nbsp;12000 (0.0083%) |
 | 1–3 | **x200** | 3&nbsp;/&nbsp;12000 (0.025%) |
 | 4–13 | **x77** | 10&nbsp;/&nbsp;12000 (0.083%) |
 | 14–63 | **x20** | 50&nbsp;/&nbsp;12000 (0.4167%) |
