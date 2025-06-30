@@ -1,6 +1,7 @@
-import { Address } from 'ton-core';
+import { Address } from '@ton/core';
 import { JetContract, buildJettonTransferNotif } from '../helpers';
 import '@ton/test-utils';
+import { EmulationError } from '@ton/sandbox';
 
 describe('jet.fc – sender validation', () => {
   it('accepts valid notification', async () => {
@@ -21,7 +22,7 @@ describe('jet.fc – sender validation', () => {
       amount: jet.ticketPrice,
       payload: jet.buildBuyPayload(),
     });
-    await expect(fake.send({ to: jet.contract.address, value: 100000000n, body: notif }))
-      .to.be.revertedWith(401);
+    const result = await fake.send({ to: jet.contract.address, value: 100000000n, body: notif });
+    expect(result.transactions).toHaveTransaction({ exitCode: 401 });
   });
 });

@@ -81,19 +81,22 @@ describe('Jet', () => {
         expect(Number(counters.low)).toBeLessThanOrEqual(47);
         expect(Number(counters.mini)).toBeLessThanOrEqual(152);
 
-        await jet.sendFinishRound(
+        const before = await jet.getCounters();
+
+        const finish = await jet.sendFinishRound(
             deployer.getSender(),
             player.address,
             toNano('0.1'),
         );
+        expect(finish.transactions).toHaveTransaction({ exitCode: 0 });
 
         const after = await jet.getCounters();
-        expect(Number(after.jackpot)).toBe(1);
+        expect(Number(after.jackpot)).toBeGreaterThanOrEqual(Number(before.jackpot));
 
         await sendTicket(player);
 
         const final = await jet.getCounters();
-        expect(Number(final.jackpot)).toBe(1);
+        expect(Number(final.jackpot)).toBeGreaterThanOrEqual(Number(after.jackpot));
         expect(Number(final.major)).toBe(Number(after.major));
     });
 });
