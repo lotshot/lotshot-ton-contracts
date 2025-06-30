@@ -16,17 +16,28 @@ int MINI_PRIZE() asm "10 PUSHINT";       ;; 10 tokens
     slice, ;; owner address
     int, ;; ticket_price (jettons)
     int, ;; ref_percent
-    slice ;; token_wallet_address
+    slice, ;; token_wallet_address
+    int ;; jp_amount
 ) load_data() inline {
     var ds = get_data().begin_parse();
+    cell counters_ref = ds~load_ref();
+    int next_ticket_index = ds~load_uint(64);
+    slice collection_address = ds~load_msg_addr();
+    slice admin_address = ds~load_msg_addr();
+    int price = ds~load_uint(128); ;; ticket_price in jettons
+    int ref_percent = ds~load_uint(16);
+    slice token_wallet_address = ds~load_msg_addr();
+    slice jp_slice = ds~load_ref().begin_parse();
+    int jp_amount = jp_slice~load_uint(128);
     return (
-        ds~load_ref(),
-        ds~load_uint(64),
-        ds~load_msg_addr(),
-        ds~load_msg_addr(),
-        ds~load_uint(128), ;; ticket_price in jettons
-        ds~load_uint(16),
-        ds~load_msg_addr()
+        counters_ref,
+        next_ticket_index,
+        collection_address,
+        admin_address,
+        price,
+        ref_percent,
+        token_wallet_address,
+        jp_amount
     );
 }
 
@@ -37,7 +48,8 @@ slice collection_address,
 slice admin_address,
 int price,
 int ref_percent,
-slice token_wallet_address
+slice token_wallet_address,
+int jp_amount
 ) impure inline {
     set_data(
         begin_cell()
@@ -48,6 +60,7 @@ slice token_wallet_address
             .store_uint(price, 128)
             .store_uint(ref_percent, 16)
             .store_slice(token_wallet_address)
+            .store_ref(begin_cell().store_uint(jp_amount, 128).end_cell())
             .end_cell()
     );
 }
@@ -73,7 +86,8 @@ slice token_wallet_address
         slice admin_address,
         int price,
         int ref_percent,
-        slice token_wallet_address
+        slice token_wallet_address,
+        int jp_amount
     ) = load_data();
 
     int op = in_msg_body.preload_uint(32);
@@ -212,7 +226,7 @@ slice token_wallet_address
                 var msg = begin_cell()
                     .store_uint(0x10, 6)
                     .store_slice(admin_address)
-                    .store_coins(10000000)
+                    .store_coins(jp_amount * jetton_decimals())
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_uint(0, 32)
                     .store_slice("Jackpot winner")
@@ -222,7 +236,7 @@ slice token_wallet_address
                 send_raw_message(msg, 1);
 
 
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
 
                 ;; Send message to admin
@@ -244,7 +258,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -266,7 +280,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -288,7 +302,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -310,7 +324,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -332,7 +346,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -354,7 +368,7 @@ slice token_wallet_address
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
                 return();
             }
         }
@@ -363,7 +377,7 @@ slice token_wallet_address
 
         send_winning(0, player_address, 7, collection_address, 7, token_wallet_address);
 
-        store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+        store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
 
         return();
     }
@@ -392,7 +406,7 @@ slice token_wallet_address
 
     if (op == 3) { ;; change_admin_address
     throw_unless(401, equal_slices(sender_address,admin_address));
-    store_data(counters_ref, next_ticket_index, collection_address, in_msg_body~load_msg_addr(), price, ref_percent, token_wallet_address);
+    store_data(counters_ref, next_ticket_index, collection_address, in_msg_body~load_msg_addr(), price, ref_percent, token_wallet_address, jp_amount);
     return();
     }
 
@@ -409,7 +423,7 @@ slice token_wallet_address
     int low = counters_slice~load_uint(16);
     int mini = counters_slice~load_uint(16);
 
-    send_winning(JACKPOT_PRIZE(), winner, 0, collection_address, 0,token_wallet_address);
+    send_winning(jp_amount, winner, 0, collection_address, 0,token_wallet_address);
     jp += 1;
 
     cell new_ref = begin_cell()
@@ -422,13 +436,13 @@ slice token_wallet_address
     .store_uint(mini, 16)
     .end_cell();
 
-    store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address);
+    store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount);
     return();
     }
 
     if (op == 5) { ;; set token_wallet_address
     throw_unless(401, equal_slices(sender_address, admin_address));
-    store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr());
+    store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr(), jp_amount);
     return();
     }
 
@@ -442,7 +456,7 @@ slice token_wallet_address
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
-    (cell counters_ref, _, _, _, _, _, _) = load_data();
+    (cell counters_ref, _, _, _, _, _, _, _) = load_data();
 
     slice counters_slice = counters_ref.begin_parse();
     int jp = counters_slice~load_uint(16);
@@ -464,7 +478,7 @@ slice token_wallet_address
 }
 
 
-(cell, int, slice, slice, int, int, slice) get_full_data() method_id {
+(cell, int, slice, slice, int, int, slice, int) get_full_data() method_id {
     var (
         cell counters_ref,
         int next_ticket_index,
@@ -472,7 +486,8 @@ slice token_wallet_address
         slice admin_address,
         int price,
         int ref_percent,
-        slice token_wallet_address
+        slice token_wallet_address,
+        int jp_amount
     ) = load_data();
 
     return (
@@ -482,6 +497,7 @@ slice token_wallet_address
         admin_address,
         price,
         ref_percent,
-        token_wallet_address
+        token_wallet_address,
+        jp_amount
     );
 }

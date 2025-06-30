@@ -46,6 +46,7 @@ describe('Jet', () => {
                     price: ticketPrice,
                     refPercent: 0,
                     tokenAddress: deployer.address,
+                    jpAmount: 10000n,
                 },
                 code,
             ),

@@ -6,6 +6,7 @@ export type JetConfig = {
     price: bigint;
     refPercent: number;
     tokenAddress: Address;
+    jpAmount: bigint;
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
@@ -27,6 +28,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeUint(config.price, 128)
         .storeUint(config.refPercent, 16)
         .storeAddress(config.tokenAddress)
+        .storeRef(beginCell().storeUint(config.jpAmount, 128).endCell())
         .endCell()
 }
 

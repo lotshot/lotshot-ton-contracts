@@ -58,6 +58,7 @@ export class JetContract {
                     price: ticketPrice,
                     refPercent: 0,
                     tokenAddress: tokenWallet.address,
+                    jpAmount: 10000n,
                 },
                 code,
             ),
