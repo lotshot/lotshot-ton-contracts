@@ -75,6 +75,8 @@ slice token_wallet_address
     int op = in_msg_body.preload_uint(32);
 
     if (op == 0x7362d09c) { ;; jetton transfer notification
+        ;; ensure notification comes from our token wallet
+        throw_unless(401, equal_slices(sender_address, token_wallet_address));
         in_msg_body~load_uint(32); ;; op
         in_msg_body~load_uint(64); ;; query_id
         int amount = in_msg_body~load_coins();
