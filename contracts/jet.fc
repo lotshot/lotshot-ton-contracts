@@ -2,12 +2,14 @@
 #include "imports/functions.fc";
 
 (
-	cell, ;; counters
-	int, ;; next_ticket_index
-	slice, ;; collection_address
+        cell,  ;; counters
+        int,   ;; next_ticket_index
+        slice, ;; collection_address
         slice, ;; owner address
-        int, ;; ticket_price
-        int ;; ref_percent
+        int,   ;; ticket_price
+        int,   ;; ref_percent
+        int,   ;; jackpot_amount (nanoTON)
+        int    ;; locked_jp_coins reserve
 ) load_data() inline {
         var ds = get_data().begin_parse();
         return (
@@ -16,7 +18,9 @@
                 ds~load_msg_addr(),
                 ds~load_msg_addr(),
                 ds~load_coins(),
-                ds~load_uint(16)
+                ds~load_uint(16),
+                ds~load_uint(128),
+                ds~load_uint(128)
         );
 }
 
@@ -26,7 +30,9 @@
         slice collection_address,
         slice admin_address,
         int price,
-        int ref_percent
+        int ref_percent,
+        int jackpot_amount,
+        int locked_jp_coins
 ) impure inline {
         set_data(
                 begin_cell()
@@ -36,6 +42,8 @@
                 .store_slice(admin_address)
                 .store_coins(price)
                 .store_uint(ref_percent, 16)
+                .store_uint(jackpot_amount, 128)
+                .store_uint(locked_jp_coins, 128)
                 .end_cell()
         );
 }
@@ -50,14 +58,16 @@
 		return();
 	}
 
-	slice sender_address = cs~load_msg_addr();
+        slice sender_address = cs~load_msg_addr();
         var (
                 cell counters_ref,
                 int next_ticket_index,
                 slice collection_address,
                 slice admin_address,
                 int price,
-                int ref_percent
+                int ref_percent,
+                int jackpot_amount,
+                int locked_jp_coins
         ) = load_data();
 
         if (in_msg_body.slice_empty?() | (slice_bits(in_msg_body) == 267)) {
@@ -67,6 +77,11 @@
 
                 throw_unless(400, msg_value == price);
                 int ticket_value = msg_value;
+
+                ;; Reserve the configured jackpot once the first ticket is sold
+                if (locked_jp_coins == 0) {
+                        locked_jp_coins = jackpot_amount;   ;; e.g. 1 000 TON on mainnet, 10 TON on testnet
+                }
 
                 if (slice_bits(in_msg_body) == 267) {
                         ;; pay referral bonus from contract balance, prize remains unaffected
@@ -104,39 +119,25 @@
 
                 if (x == 0) { ;; rolled 0
                         if (jp == 0) { ;; jackpot has not been drawn yet
-				next_ticket_index += 1;
-				 jp += 1;
-				cell new_ref = begin_cell()
-					.store_uint(jp, 16)
-					.store_uint(x200, 16)
-					.store_uint(x77, 16)
-					.store_uint(x20, 16)
-					.store_uint(x7, 16)
-					.store_uint(x3, 16)
-					.store_uint(x1, 16)
-					.end_cell();
-
-				var jp_prize = ticket_value * 1000;
-
-				var msg = begin_cell()
-					.store_uint(0x10, 6)
-					.store_slice(admin_address)
-					.store_coins(jp_prize)
-					.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-					.store_uint(0, 32)
-					.store_slice("Jackpot winner")
-					.end_cell();
-
-
-				send_raw_message(msg, 1);
-
-                   store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
-
-				return();
-
-                                ;; notify administrator
-			}
-		}
+                                ;; Ensure the contract still holds the reserve plus 0.05 TON for gas
+                                throw_unless(402, my_balance >= locked_jp_coins + 50000000);
+                                next_ticket_index += 1;
+                                jp += 1;
+                                send_winning(jackpot_amount, sender_address, "Jackpot", collection_address, 0);
+                                locked_jp_coins = 0;     ;; reserve released after successful payout
+                                cell new_ref = begin_cell()
+                                        .store_uint(jp, 16)
+                                        .store_uint(x200, 16)
+                                        .store_uint(x77, 16)
+                                        .store_uint(x20, 16)
+                                        .store_uint(x7, 16)
+                                        .store_uint(x3, 16)
+                                        .store_uint(x1, 16)
+                                        .end_cell();
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
+                                return();
+                        }
+                }
 
                 if (x < 4) { ;; rolled under 4
                         if (x200 < 3) { ;; less than 3 x200 wins
@@ -152,7 +153,7 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
@@ -171,7 +172,7 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
@@ -190,7 +191,7 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
@@ -209,7 +210,7 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
@@ -228,7 +229,7 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
@@ -247,14 +248,14 @@
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 				return();
 			}
 		}
 
 		next_ticket_index += 1;
 		send_winning(0, sender_address, "lose", collection_address, 7);
-                store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent);
+                store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 		return();
 	}
 
@@ -262,28 +263,31 @@
 	int query_id = in_msg_body~load_uint(64);
 
 
-	if (op == 2) { ;; withdrawal
-		throw_unless(401, equal_slices(sender_address, admin_address));
-		throw_unless(403, my_balance > 50000000); ;; 0.05 TON
+        if (op == 2) { ;; withdrawal
+                throw_unless(401, equal_slices(sender_address, admin_address));
+                int free_balance = my_balance - locked_jp_coins - 50000000;
+                throw_unless(403, free_balance > 0);
+                int requested = in_msg_body~load_uint(64); ;; 0 = withdraw all free
+                int amount_to_send = (requested == 0) ? free_balance : min(requested, free_balance);
 
-		var msg = begin_cell()
-			.store_uint(0x18, 6)
-			.store_slice(admin_address)
-			.store_coins(my_balance - 50000000)
-			.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-			.store_uint(0, 32)
-			.store_slice("Contract fund reallocation")
-			.end_cell();
+                var msg = begin_cell()
+                        .store_uint(0x18, 6)
+                        .store_slice(admin_address)
+                        .store_coins(amount_to_send)
+                        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                        .store_uint(0, 32)
+                        .store_slice("Contract fund reallocation")
+                        .end_cell();
 
-		send_raw_message(msg, 1);
-		return();
-	}
+                send_raw_message(msg, 1);
+                return();
+        }
 
-	if (op == 3) { ;; change_admin_address
-		throw_unless(401, equal_slices(sender_address,admin_address));
-                store_data(counters_ref, next_ticket_index, collection_address, in_msg_body~load_msg_addr(), price, ref_percent);
-		return();
-	}
+        if (op == 3) { ;; change_admin_address
+                throw_unless(401, equal_slices(sender_address,admin_address));
+                store_data(counters_ref, next_ticket_index, collection_address, in_msg_body~load_msg_addr(), price, ref_percent, jackpot_amount, locked_jp_coins);
+                return();
+        }
 
 	if (op == 4) { ;; send nft to jackpot winner
 		throw_unless(401, equal_slices(sender_address, admin_address));
@@ -296,7 +300,7 @@
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
-        (cell counters_ref, _, _, _, _, _) = load_data();
+        (cell counters_ref, _, _, _, _, _, _, _) = load_data();
 
 	slice counters_slice = counters_ref.begin_parse();
 		int jp = counters_slice~load_uint(16);
@@ -318,14 +322,16 @@
 }
 
 
-(cell, int, slice, slice, int, int) get_full_data() method_id {
+(cell, int, slice, slice, int, int, int, int) get_full_data() method_id {
         var (
                 cell counters_ref,
                 int next_ticket_index,
                 slice collection_address,
                 slice admin_address,
                 int price,
-                int ref_percent
+                int ref_percent,
+                int jackpot_amount,
+                int locked_jp_coins
         ) = load_data();
 
         return (
@@ -334,6 +340,24 @@
                 collection_address,
                 admin_address,
                 price,
-                ref_percent
+                ref_percent,
+                jackpot_amount,
+                locked_jp_coins
         );
+}
+
+() on_bounced(cell msg) impure {
+        var (
+                cell counters_ref,
+                int next_ticket_index,
+                slice collection_address,
+                slice admin_address,
+                int price,
+                int ref_percent,
+                int jackpot_amount,
+                int locked_jp_coins
+        ) = load_data();
+        ;; If the Jackpot transfer bounced, restore the reserve
+        locked_jp_coins = jackpot_amount;
+        store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 }
