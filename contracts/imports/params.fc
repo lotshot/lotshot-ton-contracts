@@ -13,4 +13,5 @@ int outer_fee() asm "150000000 PUSHINT";    ;; 0.15 TON
 ;; 0.05 TON пересылаем игроку вместе с jetton-transfer
 int forward_fee() asm "50000000 PUSHINT";   ;; 0.05 TON
 int transfer_fee() asm "70000000 PUSHINT"; ;; 0.05 TON (maybe 0.07 TON is too small)
+int min_ticket_value() asm "270000000 PUSHINT"; ;; minimal ton value to cover all transfers (~0.27 TON)
 

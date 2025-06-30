@@ -94,7 +94,7 @@ slice token_wallet_address
             fwd_payload = in_msg_body~load_ref().begin_parse();
         }
 
-        throw_unless(400, msg_value >= player_fee());
+        throw_unless(400, msg_value >= min_ticket_value());
 
         throw_unless(400, amount >= price);
 
@@ -107,14 +107,14 @@ slice token_wallet_address
                 .store_slice(sender_wallet)
                 .store_slice(my_address())
                 .store_maybe_ref(null())
-                .store_coins(forward_fee())
+                .store_coins(1)
                 .store_uint(0, 1)
                 .end_cell();
 
             var refund_msg = begin_cell()
                 .store_uint(0x10, 6)
                 .store_slice(token_wallet_address)
-                .store_coins(forward_fee())
+                .store_coins(1)
                 ;; payload stored in a reference -> body_ref flag must be 1
                 .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_ref(refund_transfer)

@@ -58,7 +58,7 @@ for all other tiers stay the same. Win notifications are broadcast live via
 
 4. After the prize is issued, one of the counters `jp`, `major`, `high`, `mid`, `low_mid`, `low`, `mini` is increased. The NFT is minted from the collection and the jetton prize is sent to the player.
 5. The contract must always keep at least 0.05 TON and enough jettons for future payouts.
-6. When sending a ticket, store your TON wallet address first in `forward_payload`, followed by an optional referrer address. Set `forward_ton_amount` to at least `0.27` TON.
+6. When sending a ticket, store your TON wallet address first in `forward_payload`, followed by an optional referrer address. Set `forward_ton_amount` to at least `min_ticket_value` (≈0.27 TON).
 
 ## Technology Stack
 - **FunC** for smart contracts
