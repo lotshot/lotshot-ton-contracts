@@ -102,6 +102,12 @@ determines the reward level, provided that tier still has prizes left:
 | 214–513 | **x3** | 300&nbsp;/&nbsp;12000 (2.5%) |
 | 514–1713 | **x1** | 1200&nbsp;/&nbsp;12000 (10%) |
 
+> **Post-Jackpot behaviour**  
+> Once the Jackpot **×1000** tier is claimed, its row is removed,  
+> but all other prize tiers remain active and ticket sales continue without pause.  
+> Players can verify which rewards are still available by inspecting the NFT attributes  
+> `Reward Level` and `Winning Amount` on Getgems.
+
 Metadata describing each tier lives in the `lottery_metadata/` folder.
 `collection.json` defines the collection, while `0.json`–`7.json` correspond to
 the jackpot, prize tiers and a "Try Again" NFT. To start a new season update the
