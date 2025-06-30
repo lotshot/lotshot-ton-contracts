@@ -33,21 +33,21 @@ The lottery issues unique NFTs for every prize tier. Metadata for each token can
 Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_PRICE`. If you have a referrer, include the 267‑bit address inside the payload. Any overpayment is returned and the referral share is sent to the referrer.
 
 ## Lottery Mechanics
-1. After receiving a payment, the contract generates a random number `x` from 0 to 1199.
+1. After receiving a payment, the contract generates a random number `x` from 0 to 11 999.
 2. If `x == 0` the contract informs the administrator about a potential jackpot. The admin should call `finishRound(address)`:
    - the player receives `JACKPOT_PRIZE` (10 000 jettons) and NFT `0`;
    - the jackpot counter increases and no new tickets are accepted.
-3. Otherwise `x` is checked against the ranges below. A prize is issued while the associated counter is below its limit. The table assumes a round of 1 200 tickets (ten times smaller than the reference table for 12 000: `1, 3, 10, 50, 150, 300, 1190`).
+3. Otherwise `x` is checked against the ranges below. A prize is issued while the associated counter is below its limit. The table assumes a round of 12 000 tickets.
 
    | Range of `x` | Counter limit | Prize (jettons) | NFT |
    |--------------|--------------:|---------------:|----:|
    | `x == 0`     | `jp < 1`      | 10 000          | 0 |
-   | `x < 2`      | `major < 1`   | 1 800           | 1 |
-   | `x < 3`      | `high < 1`    | 700             | 2 |
-   | `x < 8`      | `mid < 5`     | 180             | 3 |
-   | `x < 23`     | `low_mid < 15`| 50              | 4 |
-   | `x < 53`     | `low < 30`    | 25              | 5 |
-   | `x < 172`    | `mini < 119`  | 10              | 6 |
+   | `x < 4`      | `major < 3`   | 1 800           | 1 |
+   | `x < 14`     | `high < 10`   | 700             | 2 |
+   | `x < 64`     | `mid < 50`    | 180             | 3 |
+   | `x < 214`    | `low_mid < 150`| 50              | 4 |
+   | `x < 514`    | `low < 300`   | 25              | 5 |
+   | `x < 1704`   | `mini < 1190` | 10              | 6 |
    | otherwise    | —             | 0               | 7 |
 4. After the prize is issued, one of the counters `jp`, `major`, `high`, `mid`, `low_mid`, `low`, `mini` is increased. The NFT is minted from the collection and the jetton prize is sent to the player.
 5. The contract must always keep at least 0.05 TON and enough jettons for future payouts.
