@@ -26,7 +26,7 @@ describe('Jet', () => {
             .storeAddress(player.address)
             .endCell();
 
-        await player.send({
+        await deployer.send({
             to: jet.address,
             value: toNano('0.1'),
             body,
