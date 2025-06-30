@@ -1,4 +1,4 @@
-import { Address } from 'ton-core';
+import { Address, toNano } from '@ton/core';
 import { JetContract, buildJettonTransferNotif } from '../helpers';
 import '@ton/test-utils';
 
@@ -21,7 +21,8 @@ describe('jet.fc – sender validation', () => {
       amount: jet.ticketPrice,
       payload: jet.buildBuyPayload(),
     });
-    await expect(fake.send({ to: jet.contract.address, value: 100000000n, body: notif }))
-      .to.be.revertedWith(401);
+    await expect(
+      fake.send({ to: jet.contract.address, value: toNano('0.1'), body: notif })
+    ).rejects.toMatchObject({ exitCode: 401 });
   });
 });
