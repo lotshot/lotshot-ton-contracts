@@ -66,7 +66,8 @@ slice calculate_nft_item_address(int wc, cell state_init) {
     .store_uint(0x10, 6) ;; nobounce - int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool packages:MsgAddress -> 011000
     .store_slice(to_address)
     .store_coins(0)
-    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    ;; payload is stored directly in the body, so use mode flag 0
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
     .store_uint(op::report_royalty_params(), 32)
     .store_uint(query_id, 64)
     .store_slice(data);
