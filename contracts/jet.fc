@@ -115,7 +115,8 @@ slice token_wallet_address
                 .store_uint(0x10, 6)
                 .store_slice(token_wallet_address)
                 .store_coins(forward_fee())
-                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                ;; payload stored in a reference -> body_ref flag must be 1
+                .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_ref(refund_transfer)
                 .end_cell();
             send_raw_message(refund_msg, 1);
