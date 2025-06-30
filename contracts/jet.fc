@@ -61,6 +61,10 @@ slice token_wallet_address
         return();
     }
 
+    if (in_msg_body.slice_empty?()) {
+        return();
+    }
+
     slice sender_address = cs~load_msg_addr();
     var (
         cell counters_ref,
