@@ -69,6 +69,7 @@
                 int ticket_value = msg_value;
 
                 if (slice_bits(in_msg_body) == 267) {
+                        ;; pay referral bonus from contract balance, prize remains unaffected
                         slice ref_addr = in_msg_body~load_msg_addr();
                         int referral_amount = (msg_value * ref_percent) / 100;
                         if (referral_amount > 0) {
@@ -81,7 +82,6 @@
                                         .store_slice("referral")
                                         .end_cell();
                                 send_raw_message(ref_msg, 1);
-                                ticket_value -= referral_amount;
                         }
                 }
 
