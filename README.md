@@ -7,7 +7,9 @@
 
 Lotshot is a decentralized lottery running entirely on the TON blockchain. The smart contracts are written in FunC and managed through a TypeScript tooling stack. Together they deploy an NFT collection and handle a lottery where prizes are paid out in jettons.
 
-The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. When the jackpot tier is hit, no new tickets are accepted until the round is finished.
+The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. When the Jackpot (10 000 USDT) is won, the lottery continues without pause.  
+The Jackpot line is removed, while all remaining prize tiers (Major → Try-Again) stay active  
+and new tickets remain fully valid for those rewards.
 
 ## Setup
 1. Run `npm install` to install the project dependencies.
@@ -36,7 +38,7 @@ Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_
 1. After receiving a payment, the contract generates a random number `x` from 0 to 11 999.
 2. If `x == 0` the contract informs the administrator about a potential jackpot. The admin should call `finishRound(address)`:
    - the player receives `JACKPOT_PRIZE` (10 000 jettons) and NFT `0`;
-   - the jackpot counter increases and no new tickets are accepted.
+   - the Jackpot counter increases; remaining prize tiers continue as usual.
 3. Otherwise `x` is checked against the ranges below. A prize is issued while the associated counter is below its limit. The table assumes a round of 12 000 tickets.
 
    | Range of `x` | Counter limit | Prize (jettons) | NFT |
@@ -49,6 +51,11 @@ Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_
    | `x < 514`    | `low < 300`   | 25              | 5 |
    | `x < 1704`   | `mini < 1190` | 10              | 6 |
    | otherwise    | —             | 0               | 7 |
+
+> **Note:** After the Jackpot is claimed its row is greyed out, but odds and payouts
+for all other tiers stay the same. Win notifications are broadcast live via
+@LotshotBot on Telegram/X.
+
 4. After the prize is issued, one of the counters `jp`, `major`, `high`, `mid`, `low_mid`, `low`, `mini` is increased. The NFT is minted from the collection and the jetton prize is sent to the player.
 5. The contract must always keep at least 0.05 TON and enough jettons for future payouts.
 6. When sending a ticket, store your TON wallet address first in `forward_payload`, followed by an optional referrer address. Set `forward_ton_amount` to at least `0.27` TON.
