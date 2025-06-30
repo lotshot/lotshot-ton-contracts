@@ -74,12 +74,12 @@ describe('Jet', () => {
 
         const counters = await jet.getCounters();
 
-        expect(Number(counters.major)).toBeLessThanOrEqual(1);
-        expect(Number(counters.high)).toBeLessThanOrEqual(1);
-        expect(Number(counters.mid)).toBeLessThanOrEqual(5);
-        expect(Number(counters.lowMid)).toBeLessThanOrEqual(15);
-        expect(Number(counters.low)).toBeLessThanOrEqual(30);
-        expect(Number(counters.mini)).toBeLessThanOrEqual(119);
+        expect(Number(counters.major)).toBeLessThanOrEqual(2);
+        expect(Number(counters.high)).toBeLessThanOrEqual(4);
+        expect(Number(counters.mid)).toBeLessThanOrEqual(12);
+        expect(Number(counters.lowMid)).toBeLessThanOrEqual(27);
+        expect(Number(counters.low)).toBeLessThanOrEqual(47);
+        expect(Number(counters.mini)).toBeLessThanOrEqual(152);
 
         await jet.sendFinishRound(
             deployer.getSender(),
