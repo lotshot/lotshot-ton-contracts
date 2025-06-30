@@ -28,7 +28,7 @@ describe('Jet', () => {
 
         await deployer.send({
             to: jet.address,
-            value: toNano('0.1'),
+            value: toNano('0.27'),
             body,
         });
     }
@@ -51,7 +51,7 @@ describe('Jet', () => {
             ),
         );
 
-        const deployResult = await jet.sendDeploy(deployer.getSender(), toNano('0.1'));
+        const deployResult = await jet.sendDeploy(deployer.getSender(), toNano('0.27'));
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
@@ -86,7 +86,7 @@ describe('Jet', () => {
         const finish = await jet.sendFinishRound(
             deployer.getSender(),
             player.address,
-            toNano('0.1'),
+            toNano('0.27'),
         );
         expect(finish.transactions).toHaveTransaction({ exitCode: 0 });
 
