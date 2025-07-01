@@ -6,6 +6,9 @@ export type JetConfig = {
     price: bigint;
     refPercent: number;
     tokenAddress: Address;
+    jpAmount?: bigint;
+    lockedJpTokens?: bigint;
+    tokenBalance?: bigint;
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
@@ -22,11 +25,15 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .endCell()
         )
         .storeUint(0, 64)
-        .storeAddress(config.collectionAddress)
+        // collection and token wallet addresses are initially empty to fit 1023-bit limit
+        .storeAddress(null)
         .storeAddress(Address.parse(config.adminAddress))
         .storeUint(config.price, 128)
         .storeUint(config.refPercent, 16)
-        .storeAddress(config.tokenAddress)
+        .storeAddress(null)
+        .storeUint(config.jpAmount ?? 0n, 128)
+        .storeUint(config.lockedJpTokens ?? 0n, 128)
+        .storeUint(config.tokenBalance ?? 0n, 128)
         .endCell()
 }
 
