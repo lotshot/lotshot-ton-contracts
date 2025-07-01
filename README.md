@@ -31,7 +31,7 @@ and new tickets remain fully valid for those rewards.
 The `deployJet.ts` script also exposes `withdraw()`, `withdrawUSDT()` and `finishRound(winner)` for administrative actions.
 
 ## NFT Collection
-The lottery issues unique NFTs for every prize tier. Metadata for each token can be found in the `lottery_metadata` directory and is pinned to IPFS. The collection is deployed once and the lottery contract mints the appropriate token when a player wins.
+The lottery issues unique NFTs for every prize tier. Metadata for each token can be found in the `lottery_metadata` directory and is pinned to IPFS. The collection contract stores the lottery address alongside the owner address, next item index and royalty details. The collection is deployed once and the lottery contract mints the appropriate token when a player wins.
 
 ## Participation
 Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_PRICE`. If you have a referrer, include the 267‑bit address inside the payload. Any overpayment is returned and the referral share is sent to the referrer.
