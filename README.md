@@ -38,7 +38,9 @@ The `.env` file requires the following fields:
 - `TONCENTER_API_KEY` – API key for a TON access provider.
 - `COLLECTION_OWNER` – address that will receive NFT royalties.
 - `ADMIN_ADDRESS` – address of the lottery administrator.
-- `REF_PERCENT` – referral fee in basis points.
+- `REF_PERCENT` – referral fee in basis points.  
+- `JACKPOT_AMOUNT_TON` – jackpot size in whole TON for the TON lottery  
+  (defaults to 1000 TON on mainnet and 10 TON on testnet if unset).
 
 ## Compiling contracts
 
