@@ -1,6 +1,9 @@
 #include "params.fc";
 
 cell generate_nft_content(int value, slice owner) {
+    ;; disallow negative values to avoid unexpected behavior
+    throw_unless(400, value >= 0);
+
     builder result = begin_cell();
 
     int divisor = 1;
@@ -9,9 +12,7 @@ cell generate_nft_content(int value, slice owner) {
     do {
         (int digit, value) = divmod(value, divisor);
         divisor /= 10;
-        int char = 0;
-        if (digit < 10) { char = 48 + digit; } else { char = 87 + digit; }
-        ;;         '0' char code ^^       'a' char code - 10 ^^
+        int char = 48 + digit; ;; '0' character code
         result = result.store_uint(char, 8);
     } until (divisor == 0);
 
