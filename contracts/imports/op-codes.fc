@@ -1,24 +1,3 @@
-const int op::transfer = 0x5fcc3d14;
-const int op::ownership_assigned = 0x05138d91;
-const int op::excesses = 0xd53276db;
-const int op::get_static_data = 0x2fcb26a2;
-const int op::report_static_data = 0x8b771735;
+;; Only opcodes that are currently used within the contracts
 const int op::get_royalty_params = 0x693d3950;
 const int op::report_royalty_params = 0xa8cb00ad;
-
-;; NFTEditable
-const int op::edit_content = 0x1a0b9d51;
-const int op::transfer_editorship = 0x1c04412a;
-const int op::editorship_assigned = 0x511a4463;
-
-;; SBT
-const int op::request_owner = 0xd0c3bfea;
-const int op::owner_info = 0x0dd607e3;
-
-const int op::prove_ownership = 0x04ded148;
-const int op::ownership_proof = 0x0524c7ae;
-const int op::ownership_proof_bounced = 0xc18e86d2;
-
-const int op::destroy = 0x1f04537a;
-const int op::revoke = 0x6f89f5e3;
-const int op::take_excess = 0xd136d3b3;
