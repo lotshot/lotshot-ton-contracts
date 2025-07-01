@@ -89,7 +89,7 @@
                         int referral_amount = (msg_value * ref_percent) / 100;
                         if (referral_amount > 0) {
                                 var ref_msg = begin_cell()
-                                        .store_uint(0x10, 6)
+                                        .store_uint(0x18, 6)
                                         .store_slice(ref_addr)
                                         .store_coins(referral_amount)
                                         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
