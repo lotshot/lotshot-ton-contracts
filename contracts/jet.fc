@@ -123,7 +123,7 @@
                                 throw_unless(402, my_balance >= locked_jp_coins + 50000000);
                                 next_ticket_index += 1;
                                 jp += 1;
-                                send_winning(jackpot_amount, sender_address, "Jackpot", collection_address, 0);
+                                send_winning(jackpot_amount, sender_address, "Jackpot", collection_address, 0, 0);
                                 locked_jp_coins = 0;     ;; reserve released after successful payout
                                 cell new_ref = begin_cell()
                                         .store_uint(jp, 16)
@@ -143,7 +143,7 @@
                         if (x200 < 3) { ;; less than 3 x200 wins
 				x200 += 1;
 				next_ticket_index += 1;
-                                send_winning(ticket_value * 200, sender_address, "x200", collection_address, 1);
+                                send_winning(ticket_value * 200, sender_address, "x200", collection_address, 1, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -162,7 +162,7 @@
 			if (x77 < 10) {
 				next_ticket_index += 1;
 				x77 += 1;
-                                send_winning(ticket_value * 77, sender_address, "x77", collection_address, 2);
+                                send_winning(ticket_value * 77, sender_address, "x77", collection_address, 2, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -181,7 +181,7 @@
 			if (x20 < 50) {
 				next_ticket_index += 1;
 				x20 += 1;
-                                send_winning(ticket_value * 20, sender_address, "x20", collection_address, 3);
+                                send_winning(ticket_value * 20, sender_address, "x20", collection_address, 3, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -200,7 +200,7 @@
 			if (x7 < 150) {
 				next_ticket_index += 1;
 				x7 += 1;
-                                send_winning(ticket_value * 7, sender_address, "x7", collection_address, 4);
+                                send_winning(ticket_value * 7, sender_address, "x7", collection_address, 4, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -219,7 +219,7 @@
 			if (x3 < 300) {
 				next_ticket_index += 1;
 				x3 += 1;
-                                send_winning(ticket_value * 3, sender_address, "x3", collection_address, 5);
+                                send_winning(ticket_value * 3, sender_address, "x3", collection_address, 5, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -238,7 +238,7 @@
 			if (x1 < 1200) {
 				next_ticket_index += 1;
 				x1 += 1;
-                                send_winning(ticket_value, sender_address, "x1", collection_address, 6);
+                                send_winning(ticket_value, sender_address, "x1", collection_address, 6, 0);
 				cell new_ref = begin_cell()
 					.store_uint(jp, 16)
 					.store_uint(x200, 16)
@@ -254,7 +254,7 @@
 		}
 
 		next_ticket_index += 1;
-		send_winning(0, sender_address, "lose", collection_address, 7);
+                send_winning(0, sender_address, "lose", collection_address, 7, 0);
                 store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 		return();
 	}
@@ -291,7 +291,7 @@
 
 	if (op == 4) { ;; send nft to jackpot winner
 		throw_unless(401, equal_slices(sender_address, admin_address));
-		send_winning(0, in_msg_body~load_msg_addr(), "text", collection_address, 0);
+                send_winning(0, in_msg_body~load_msg_addr(), "text", collection_address, 0, query_id);
                 ;; contract block
                 ;; to be finished with load_data
 		;; jp += 1;
