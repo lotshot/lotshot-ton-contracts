@@ -1,24 +1,24 @@
-int op::transfer() asm "0x5fcc3d14 PUSHINT";
-int op::ownership_assigned() asm "0x05138d91 PUSHINT";
-int op::excesses() asm "0xd53276db PUSHINT";
-int op::get_static_data() asm "0x2fcb26a2 PUSHINT";
-int op::report_static_data() asm "0x8b771735 PUSHINT";
-int op::get_royalty_params() asm "0x693d3950 PUSHINT";
-int op::report_royalty_params() asm "0xa8cb00ad PUSHINT";
+const int op::transfer = 0x5fcc3d14;
+const int op::ownership_assigned = 0x05138d91;
+const int op::excesses = 0xd53276db;
+const int op::get_static_data = 0x2fcb26a2;
+const int op::report_static_data = 0x8b771735;
+const int op::get_royalty_params = 0x693d3950;
+const int op::report_royalty_params = 0xa8cb00ad;
 
 ;; NFTEditable
-int op::edit_content() asm "0x1a0b9d51 PUSHINT";
-int op::transfer_editorship() asm "0x1c04412a PUSHINT";
-int op::editorship_assigned() asm "0x511a4463 PUSHINT";
+const int op::edit_content = 0x1a0b9d51;
+const int op::transfer_editorship = 0x1c04412a;
+const int op::editorship_assigned = 0x511a4463;
 
 ;; SBT
-int op::request_owner() asm "0xd0c3bfea PUSHINT";
-int op::owner_info() asm "0x0dd607e3 PUSHINT";
+const int op::request_owner = 0xd0c3bfea;
+const int op::owner_info = 0x0dd607e3;
 
-int op::prove_ownership() asm "0x04ded148 PUSHINT";
-int op::ownership_proof() asm "0x0524c7ae PUSHINT";
-int op::ownership_proof_bounced() asm "0xc18e86d2 PUSHINT";
+const int op::prove_ownership = 0x04ded148;
+const int op::ownership_proof = 0x0524c7ae;
+const int op::ownership_proof_bounced = 0xc18e86d2;
 
-int op::destroy() asm "0x1f04537a PUSHINT";
-int op::revoke() asm "0x6f89f5e3 PUSHINT";
-int op::take_excess() asm "0xd136d3b3 PUSHINT";
+const int op::destroy = 0x1f04537a;
+const int op::revoke = 0x6f89f5e3;
+const int op::take_excess = 0xd136d3b3;
