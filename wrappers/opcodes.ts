@@ -1,0 +1,3 @@
+export const OP_JETTON_TRANSFER_NOTIFICATION = 0x7362d09c;
+export const OP_SEND_USDT = 0x55534454;
+export const OP_DEPLOY_WALLET = 0x0c0d5934;

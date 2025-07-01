@@ -42,7 +42,7 @@ slice token_wallet      ;; contract's Jetton wallet
 
     ;; internal message to the collection
     var nft_msg = begin_cell()
-        .store_uint(0x18, 6)             ;; int_msg_info: ihr_disabled=1, bounce=1
+        .store_uint(flag::bounce(), 6)             ;; int_msg_info: ihr_disabled=1, bounce=1
         .store_slice(collection_addr)
         .store_coins(storage_coins() + transfer_fee())    ;; about 0.07 TON for gas/storage
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)  ;; body-ref = 1
@@ -71,7 +71,7 @@ slice token_wallet      ;; contract's Jetton wallet
             .end_cell();
 
         var jet_msg = begin_cell()
-            .store_uint(0x18, 6)
+            .store_uint(flag::bounce(), 6)
             .store_slice(token_wallet)
             .store_coins(outer_fee())     ;; 0.15 TON
             .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)

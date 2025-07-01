@@ -2,10 +2,11 @@ import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { beginCell, Address, Cell, toNano } from '@ton/core';
 import { compile } from '@ton/blueprint';
 import { Jet } from '../wrappers/Jet';
+import { OP_JETTON_TRANSFER_NOTIFICATION } from '../wrappers/opcodes';
 
 export function buildJettonTransferNotif(opts: { from: Address; amount: bigint; payload: Cell }): Cell {
     return beginCell()
-        .storeUint(0x7362d09c, 32)
+        .storeUint(OP_JETTON_TRANSFER_NOTIFICATION, 32)
         .storeUint(0, 64)
         .storeCoins(opts.amount)
         .storeAddress(opts.from)
