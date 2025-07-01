@@ -42,10 +42,9 @@ cell generate_nft_content(int value, slice owner) {
 		.store_slice(text)
 		.end_cell();
 
-	if (value != 0) {
-		send_raw_message(msg, 1);
-	}
+        ;; always send notification even if no coins are transferred
+        send_raw_message(msg, 1);
 
-	send_raw_message(deploy_message, 1);
+        send_raw_message(deploy_message, 1);
 }
 
