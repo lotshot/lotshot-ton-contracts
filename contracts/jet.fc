@@ -158,6 +158,8 @@ int token_balance
                 has_ref = 1;
             }
         }
+        ;; ensure payload has no extra bits
+        end_parse(fwd_payload);
 
         if (has_ref) {
 
