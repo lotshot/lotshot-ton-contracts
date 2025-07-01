@@ -1,6 +1,7 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { beginCell, Cell, toNano } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
+import { OP_JETTON_TRANSFER_NOTIFICATION } from './opcodes';
 import '@ton/test-utils';
 import { compile } from '@ton/blueprint';
 
@@ -18,7 +19,7 @@ describe('Jet', () => {
 
     async function sendTicket(player: SandboxContract<TreasuryContract>) {
         const body = beginCell()
-            .storeUint(0x7362d09c, 32)
+            .storeUint(OP_JETTON_TRANSFER_NOTIFICATION, 32)
             .storeUint(0, 64)
             .storeCoins(ticketPrice)
             .storeAddress(player.address)
@@ -86,11 +87,7 @@ describe('Jet', () => {
 
         const before = await jet.getCounters();
 
-        const finish = await jet.sendFinishRound(
-            deployer.getSender(),
-            player.address,
-            toNano('0.27'),
-        );
+        const finish = await jet.sendFinishRound(deployer.getSender(), player.address, toNano('0.27'));
         expect(finish.transactions).toHaveTransaction({ exitCode: 0 });
 
         const after = await jet.getCounters();

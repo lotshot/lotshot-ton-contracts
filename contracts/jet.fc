@@ -93,7 +93,7 @@ int token_balance
 
     int op = in_msg_body.preload_uint(32);
 
-    if (op == 0x7362d09c) { ;; jetton transfer notification
+    if (op == op::jetton_transfer_notification()) { ;; jetton transfer notification
         slice orig_body = in_msg_body; ;; keep for refunds
         try {
             ;; guard against spoofed senders (exit-code 401)
@@ -122,7 +122,7 @@ int token_balance
         int excess = amount - price;
         if (excess > 0) {
                 var refund_transfer = begin_cell()
-                .store_uint(0xf8a7ea5, 32)
+                .store_uint(op::jetton_transfer(), 32)
                 .store_uint(qid, 64)
                 .store_coins(excess)
                 .store_slice(sender_wallet)
@@ -134,7 +134,7 @@ int token_balance
                 .end_cell();
 
             var refund_msg = begin_cell()
-                .store_uint(0x18, 6)
+                .store_uint(flag::bounce(), 6)
                 .store_slice(token_wallet_address)
                 .store_coins(1)
                 ;; payload stored in a reference -> body_ref flag must be 1
@@ -184,7 +184,7 @@ int token_balance
                         .end_cell();
 
                     var ref_msg = begin_cell()
-                        .store_uint(0x18, 6)
+                        .store_uint(flag::bounce(), 6)
                         .store_slice(token_wallet_address)
                         .store_coins(outer_fee())
                         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -232,7 +232,7 @@ int token_balance
                     .end_cell();
 
                 var msg = begin_cell()
-                    .store_uint(0x18, 6)
+                    .store_uint(flag::bounce(), 6)
                     .store_slice(admin_address)
                     .store_coins(10000000)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
@@ -423,7 +423,7 @@ int token_balance
         throw_unless(403, my_balance > 50000000); ;; 0.05 TON
 
         var msg = begin_cell()
-            .store_uint(0x18, 6)
+            .store_uint(flag::bounce(), 6)
             .store_slice(admin_address)
             .store_coins(my_balance - 50000000)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)

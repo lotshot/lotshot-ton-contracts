@@ -53,7 +53,7 @@ slice calculate_nft_item_address(int wc, cell state_init) {
     cell state_init = calculate_nft_item_state_init(item_index, nft_item_code);
     slice nft_address = calculate_nft_item_address(workchain(), state_init);
     var msg = begin_cell()
-        .store_uint(0x18, 6)
+        .store_uint(flag::bounce(), 6)
         .store_slice(nft_address)
         .store_coins(amount)
         .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
@@ -64,7 +64,7 @@ slice calculate_nft_item_address(int wc, cell state_init) {
 
 () send_royalty_params(slice to_address, int query_id, slice data) impure inline {
     var msg = begin_cell()
-        .store_uint(0x18, 6) ;; bounceable - allows refunds on failure
+        .store_uint(flag::bounce(), 6) ;; bounceable - allows refunds on failure
         .store_slice(to_address)
         .store_coins(0)
         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)

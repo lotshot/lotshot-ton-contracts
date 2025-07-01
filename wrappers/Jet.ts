@@ -1,4 +1,5 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
+import { OP_SEND_USDT } from './opcodes';
 
 export type JetConfig = {
     collectionAddress: Address;
@@ -12,29 +13,31 @@ export type JetConfig = {
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
-    return beginCell()
-        .storeRef(
-            beginCell()
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
+    return (
+        beginCell()
+            .storeRef(
+                beginCell()
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .storeUint(0, 16)
+                    .endCell(),
+            )
+            .storeUint(0, 64)
+            // collection and token wallet addresses are initially empty to fit 1023-bit limit
+            .storeAddress(null)
+            .storeAddress(Address.parse(config.adminAddress))
+            .storeUint(config.price, 128)
+            .storeUint(config.refPercent, 16)
+            .storeAddress(null)
+            .storeUint(config.jpAmount ?? 0n, 128)
+            .storeUint(config.lockedJpTokens ?? 0n, 128)
+            .storeUint(config.tokenBalance ?? 0n, 128)
             .endCell()
-        )
-        .storeUint(0, 64)
-        // collection and token wallet addresses are initially empty to fit 1023-bit limit
-        .storeAddress(null)
-        .storeAddress(Address.parse(config.adminAddress))
-        .storeUint(config.price, 128)
-        .storeUint(config.refPercent, 16)
-        .storeAddress(null)
-        .storeUint(config.jpAmount ?? 0n, 128)
-        .storeUint(config.lockedJpTokens ?? 0n, 128)
-        .storeUint(config.tokenBalance ?? 0n, 128)
-        .endCell()
+    );
 }
 
 export class Jet implements Contract {
@@ -53,8 +56,6 @@ export class Jet implements Contract {
         return new Jet(contractAddress(workchain, init), init);
     }
 
-
-
     async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
         await provider.internal(via, {
             value,
@@ -63,17 +64,8 @@ export class Jet implements Contract {
         });
     }
 
-    async sendSetTokenWalletAddress(
-        provider: ContractProvider,
-        via: Sender,
-        wallet: Address,
-        value: bigint,
-    ) {
-        const body = beginCell()
-            .storeUint(5, 32)
-            .storeUint(0, 64)
-            .storeAddress(wallet)
-            .endCell();
+    async sendSetTokenWalletAddress(provider: ContractProvider, via: Sender, wallet: Address, value: bigint) {
+        const body = beginCell().storeUint(5, 32).storeUint(0, 64).storeAddress(wallet).endCell();
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
@@ -81,15 +73,9 @@ export class Jet implements Contract {
         });
     }
 
-    async sendUSDT(
-        provider: ContractProvider,
-        via: Sender,
-        recipient: Address,
-        amount: bigint,
-        value: bigint,
-    ) {
+    async sendUSDT(provider: ContractProvider, via: Sender, recipient: Address, amount: bigint, value: bigint) {
         const body = beginCell()
-            .storeUint(0x55534454, 32)
+            .storeUint(OP_SEND_USDT, 32)
             .storeUint(0, 64)
             .storeAddress(recipient)
             .storeUint(amount, 128)
@@ -101,15 +87,8 @@ export class Jet implements Contract {
         });
     }
 
-    async sendWithdraw(
-        provider: ContractProvider,
-        via: Sender,
-        value: bigint,
-    ) {
-        const body = beginCell()
-            .storeUint(2, 32)
-            .storeUint(0, 64)
-            .endCell();
+    async sendWithdraw(provider: ContractProvider, via: Sender, value: bigint) {
+        const body = beginCell().storeUint(2, 32).storeUint(0, 64).endCell();
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
@@ -117,17 +96,8 @@ export class Jet implements Contract {
         });
     }
 
-    async sendFinishRound(
-        provider: ContractProvider,
-        via: Sender,
-        winner: Address,
-        value: bigint,
-    ) {
-        const body = beginCell()
-            .storeUint(4, 32)
-            .storeUint(0, 64)
-            .storeAddress(winner)
-            .endCell();
+    async sendFinishRound(provider: ContractProvider, via: Sender, winner: Address, value: bigint) {
+        const body = beginCell().storeUint(4, 32).storeUint(0, 64).storeAddress(winner).endCell();
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
