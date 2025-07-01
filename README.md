@@ -19,6 +19,8 @@ and new tickets remain fully valid for those rewards.
    - `TOKEN_ADDRESS` – jetton used to pay for lottery tickets.
    - `TICKET_PRICE` – price of one ticket denominated in the jetton.
    - `REF_PERCENT` – referral payout in basis points.
+   - `JACKPOT_AMOUNT_USDT` – jackpot size (whole USDT) for the USDT lottery
+     (defaults: 10 000 mainnet / 100 testnet).
 
 ## Deployment
 1. Prepare the metadata files `collection.json` and `0.json–7.json`, upload them to IPFS and place the resulting link into `collectionConfig.content`.

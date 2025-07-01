@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, toNano } from '@ton/core';
+import { Address, beginCell, Cell, toNano, contractAddress } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { compile, NetworkProvider } from '@ton/blueprint';
@@ -27,7 +27,37 @@ export async function run(provider: NetworkProvider) {
         JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS || '')),
     );
 
-    const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
+    const code = await compile('Jet');
+    const network = provider.network();
+    const jpUsdt = process.env.JACKPOT_AMOUNT_USDT
+        ? BigInt(process.env.JACKPOT_AMOUNT_USDT) * 10n ** 9n
+        : (network === 'mainnet' ? 10_000n : 100n) * 10n ** 9n;
+
+    const stateInit = beginCell()
+        .storeRef(
+            beginCell()
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .endCell(),
+        )
+        .storeUint(0, 64)
+        .storeAddress(lotteryConfig.collectionAddress)
+        .storeAddress(Address.parse(lotteryConfig.adminAddress))
+        .storeUint(lotteryConfig.price, 128)
+        .storeUint(lotteryConfig.refPercent, 16)
+        .storeAddress(lotteryConfig.tokenAddress)
+        .storeUint(jpUsdt, 128)   // jp_amount
+        .storeUint(0n, 128)       // locked_jp_tokens
+        .storeUint(0n, 128)       // token_balance
+        .endCell();
+
+    const init = { code, data: stateInit };
+    const jet = provider.open(new Jet(contractAddress(0, init), init));
 
     // await deploy();
     // await setLotteryAddress();
