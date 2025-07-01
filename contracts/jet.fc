@@ -28,7 +28,7 @@ int MINI_PRIZE() asm "10 PUSHINT";       ;; 10 tokens
         ds~load_msg_addr(),
         ds~load_msg_addr(),
         ds~load_uint(128), ;; ticket_price in jettons
-        ds~load_uint(16),
+        ds~load_uint(8),
         ds~load_msg_addr(),
         ds~load_uint(128),
         ds~load_uint(128),
@@ -55,7 +55,7 @@ int token_balance
             .store_slice(collection_address)
             .store_slice(admin_address)
             .store_uint(price, 128)
-            .store_uint(ref_percent, 16)
+            .store_uint(ref_percent, 8)
             .store_slice(token_wallet_address)
             .store_uint(jp_amount, 128)
             .store_uint(locked_jp_tokens, 128)
