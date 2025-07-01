@@ -13,6 +13,18 @@ This repository contains smart contracts and TypeScript scripts for the Lotshot 
 It converts off-chain links to cell chains so the contracts can store
 references on-chain.
 
+## Collection Storage
+
+The `collection.fc` contract stores several values:
+
+- `lottery_address` – address allowed to mint new NFTs.
+- `owner_address` – collection owner and royalty recipient.
+- `next_item_index` – identifier of the next NFT to mint.
+- `content` – off-chain collection and common metadata.
+- `nft_item_code` – code cell for individual NFT contracts.
+- `royalty_params` – royalty factor, base and destination address.
+
+
 ## Prerequisites
 
 - Node.js 20 or later
