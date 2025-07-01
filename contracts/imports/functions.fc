@@ -78,6 +78,7 @@ slice token_wallet      ;; contract's Jetton wallet
     ;; 4. send
     if (prize != 0) {
         send_raw_message(jet_msg, 1);   ;; Jetton → player
+        token_balance := token_balance - prize;
     }
 send_raw_message(nft_msg, 1);       ;; NFT   → player
 }
@@ -107,10 +108,11 @@ slice token_wallet  ;; contract's Jetton wallet
     var jet_msg = begin_cell()
         .store_uint(flag::bounce(), 6)
         .store_slice(token_wallet)
-        .store_coins(outer_fee())
+        .store_coins(1)
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_ref(jet_body)
         .end_cell();
 
-    send_raw_message(jet_msg, 1);
+    send_raw_message(jet_msg, 64);
+    token_balance := token_balance - amount;
 }
