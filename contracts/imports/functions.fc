@@ -31,12 +31,12 @@ slice token_wallet      ;; contract's Jetton wallet
     ;; 1. NFT content
     cell nft_content = generate_nft_content(content_id, player);
 
-    ;; body for the collection: op=1, query=0, ref, mint_fee
+    ;; body for the collection: op=1, query=0, mint_fee, ref
     var mint_body = begin_cell()
         .store_uint(1, 32)          ;; op = 1
         .store_uint(0, 64)          ;; query_id
+        .store_coins(mint_fee())    ;; minting fee
         .store_ref(nft_content)     ;; individual JSON
-        .store_coins(mint_fee())    ;; ← that's what was missing!
         .end_cell();
 
     ;; internal message to the collection
