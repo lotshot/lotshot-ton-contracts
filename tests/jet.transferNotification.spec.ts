@@ -23,6 +23,6 @@ describe('jet.fc – sender validation', () => {
       payload: jet.buildBuyPayload(),
     });
     const result = await fake.send({ to: jet.contract.address, value: 270000000n, body: notif });
-    expect(result.transactions).toHaveTransaction({ exitCode: 401 });
+    expect(result.transactions).toHaveTransaction({ exitCode: 9 });
   });
 });
