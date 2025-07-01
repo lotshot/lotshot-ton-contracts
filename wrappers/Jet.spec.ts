@@ -68,7 +68,7 @@ describe('Jet', () => {
         // deployment assertions are handled in beforeEach
     });
 
-    it.skip('should handle draws and jackpot logic', async () => {
+    it('should handle draws and jackpot logic', async () => {
         const player = await blockchain.treasury('player');
 
         for (let i = 0; i < 10; i++) {
