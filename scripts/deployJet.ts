@@ -21,7 +21,7 @@ export async function run(provider: NetworkProvider) {
     };
 
     const jetCode = await compile('Jet');
-    const network = provider.network;
+    const network = provider.network();
     const jpAmount = process.env.JACKPOT_AMOUNT_TON
         ? BigInt(process.env.JACKPOT_AMOUNT_TON) * 10n ** 9n   // TON → nanoTON
         : network === 'mainnet'
