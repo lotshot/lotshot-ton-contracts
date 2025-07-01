@@ -94,28 +94,30 @@ int token_balance
     int op = in_msg_body.preload_uint(32);
 
     if (op == 0x7362d09c) { ;; jetton transfer notification
-        ;; guard against spoofed senders (exit-code 401)
-        throw_unless(401, equal_slices(sender_address, token_wallet_address));
-        in_msg_body~load_uint(32); ;; op
-        int qid = in_msg_body~load_uint(64); ;; query_id
-        int amount = in_msg_body~load_coins();
-        slice sender_wallet = in_msg_body~load_msg_addr();
+        slice orig_body = in_msg_body; ;; keep for refunds
+        try {
+            ;; guard against spoofed senders (exit-code 401)
+            throw_unless(401, equal_slices(sender_address, token_wallet_address));
+            in_msg_body~load_uint(32); ;; op
+            int qid = in_msg_body~load_uint(64); ;; query_id
+            int amount = in_msg_body~load_coins();
+            slice sender_wallet = in_msg_body~load_msg_addr();
 
-        int is_cell = in_msg_body~load_uint(1);
-        slice fwd_payload = begin_cell().end_cell().begin_parse();
-        if (is_cell == 0) {
-            fwd_payload = in_msg_body;
-        } else {
-            fwd_payload = in_msg_body~load_ref().begin_parse();
-        }
+            int is_cell = in_msg_body~load_uint(1);
+            slice fwd_payload = begin_cell().end_cell().begin_parse();
+            if (is_cell == 0) {
+                fwd_payload = in_msg_body;
+            } else {
+                fwd_payload = in_msg_body~load_ref().begin_parse();
+            }
 
-        throw_unless(400, msg_value >= min_ticket_value());
+            throw_unless(400, msg_value >= min_ticket_value());
 
-        throw_unless(400, amount >= price);
-        token_balance += amount;
-        if (locked_jp_tokens == 0) {
-            locked_jp_tokens = jp_amount;
-        }
+            throw_unless(400, amount >= price);
+            token_balance += amount;
+            if (locked_jp_tokens == 0) {
+                locked_jp_tokens = jp_amount;
+            }
 
         int excess = amount - price;
         if (excess > 0) {
@@ -397,6 +399,24 @@ int token_balance
         store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance);
 
         return();
+        }
+        catch (_) {
+            if (equal_slices(sender_address, token_wallet_address)) {
+                slice rbody = orig_body;
+                int rqid = 0;
+                int ramount = 0;
+                slice rsender = null_addr();
+                try {
+                    rbody~load_uint(32);
+                    rqid = rbody~load_uint(64);
+                    ramount = rbody~load_coins();
+                    rsender = rbody~load_msg_addr();
+                    refund_tokens(ramount, rqid, rsender, token_wallet_address);
+                } catch (_) {
+                }
+            }
+            return();
+        }
     }
 
     ;; parse op and query_id for admin operations

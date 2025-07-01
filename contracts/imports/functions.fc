@@ -118,3 +118,32 @@ slice token_wallet  ;; contract's Jetton wallet
 
     send_raw_message(jet_msg, 64);
 }
+
+() refund_tokens(
+int   amount,       ;; amount in jettons
+int   query_id,     ;; query id for tracking
+slice recipient,    ;; player wallet
+slice token_wallet  ;; contract's Jetton wallet
+) impure inline {
+    var refund_body = begin_cell()
+        .store_uint(op::jetton_transfer(), 32)
+        .store_uint(query_id, 64)
+        .store_coins(amount)
+        .store_slice(recipient)
+        ;; excess gas and notifications back to initiator
+        .store_slice(recipient)
+        .store_maybe_ref(null())
+        .store_coins(1)
+        .store_uint(0, 1)
+        .end_cell();
+
+    var refund_msg = begin_cell()
+        .store_uint(flag::bounce(), 6)
+        .store_slice(token_wallet)
+        .store_coins(1)
+        .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_ref(refund_body)
+        .end_cell();
+
+    send_raw_message(refund_msg, 1);
+}
