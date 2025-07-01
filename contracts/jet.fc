@@ -162,20 +162,14 @@ int token_balance
         end_parse(fwd_payload);
 
         if (has_ref) {
+            var ui_pl = begin_cell()
+                .store_uint(op::send_reff(), 32)
+                .store_uint(ref_percent, 8)
+                .end_cell();
 
-            if (slice_empty?(ref_addr)) {
-                has_ref = 0;
-            }
+            int referral_amount = price * ref_percent / 100;
 
-            if (has_ref) {
-                var ui_pl = begin_cell()
-                    .store_uint(op::send_reff(), 32)
-                    .store_uint(ref_percent, 8)
-                    .end_cell();
-
-                int referral_amount = price * ref_percent / 100;
-
-                if (referral_amount > 0) {
+            if (referral_amount > 0) {
                     var ref_transfer = begin_cell()
                         .store_uint(op::jetton_transfer(), 32)
                         .store_uint(qid, 64)
@@ -199,7 +193,6 @@ int token_balance
 
                     send_raw_message(ref_msg, 1);
                 }
-            }
         }
 
 
