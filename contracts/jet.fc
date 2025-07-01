@@ -124,7 +124,8 @@ int token_balance
                 .store_uint(qid, 64)
                 .store_coins(excess)
                 .store_slice(sender_wallet)
-                .store_slice(my_address())
+                ;; excess gas and notifications back to initiator
+                .store_slice(sender_wallet)
                 .store_maybe_ref(null())
                 .store_coins(1)
                 .store_uint(0, 1)
@@ -176,7 +177,8 @@ int token_balance
                         .store_uint(qid, 64)
                         .store_coins(referral_amount)
                         .store_slice(ref_addr)
-                        .store_slice(my_address())
+                        ;; send excess gas to the player
+                        .store_slice(sender_wallet)
                         .store_uint(0, 1)
                         .store_coins(forward_fee())
                         .store_uint(1, 1)
