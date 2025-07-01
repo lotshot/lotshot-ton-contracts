@@ -97,7 +97,7 @@ int token_balance
         ;; guard against spoofed senders (exit-code 401)
         throw_unless(401, equal_slices(sender_address, token_wallet_address));
         in_msg_body~load_uint(32); ;; op
-        in_msg_body~load_uint(64); ;; query_id
+        int qid = in_msg_body~load_uint(64); ;; query_id
         int amount = in_msg_body~load_coins();
         slice sender_wallet = in_msg_body~load_msg_addr();
 
@@ -121,7 +121,7 @@ int token_balance
         if (excess > 0) {
                 var refund_transfer = begin_cell()
                 .store_uint(0xf8a7ea5, 32)
-                .store_uint(0, 64)
+                .store_uint(qid, 64)
                 .store_coins(excess)
                 .store_slice(sender_wallet)
                 .store_slice(my_address())
@@ -173,7 +173,7 @@ int token_balance
                 if (referral_amount > 0) {
                     var ref_transfer = begin_cell()
                         .store_uint(op::jetton_transfer(), 32)
-                        .store_uint(0, 64)
+                        .store_uint(qid, 64)
                         .store_coins(referral_amount)
                         .store_slice(ref_addr)
                         .store_slice(my_address())
@@ -219,7 +219,7 @@ int token_balance
                 throw_unless(402, token_balance >= locked_jp_tokens);
                 next_ticket_index += 1;
                  jp += 1;
-                send_winning(jp_amount, player_address, 0, collection_address, 0, token_wallet_address);
+                send_winning(jp_amount, qid, player_address, 0, collection_address, 0, token_wallet_address);
                 token_balance  = token_balance - jp_amount;
                 locked_jp_tokens = 0;
                 cell new_ref = begin_cell()
@@ -257,7 +257,7 @@ int token_balance
             if (major < 3) {        ;; max 3 Major
                 major += 1;
                 next_ticket_index += 1;
-                send_winning(MAJOR_PRIZE(), player_address, 1, collection_address, 1, token_wallet_address);
+                send_winning(MAJOR_PRIZE(), qid, player_address, 1, collection_address, 1, token_wallet_address);
                 token_balance = token_balance - MAJOR_PRIZE();
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -279,7 +279,7 @@ int token_balance
                 next_ticket_index += 1;
                 high += 1;
 
-                send_winning(HIGH_PRIZE(), player_address, 2, collection_address, 2, token_wallet_address);
+                send_winning(HIGH_PRIZE(), qid, player_address, 2, collection_address, 2, token_wallet_address);
                 token_balance = token_balance - HIGH_PRIZE();
 
                 cell new_ref = begin_cell()
@@ -302,7 +302,7 @@ int token_balance
                 next_ticket_index += 1;
                 mid += 1;
 
-                send_winning(MID_PRIZE(), player_address, 3, collection_address, 3, token_wallet_address);
+                send_winning(MID_PRIZE(), qid, player_address, 3, collection_address, 3, token_wallet_address);
                 token_balance = token_balance - MID_PRIZE();
 
                 cell new_ref = begin_cell()
@@ -325,7 +325,7 @@ int token_balance
                 next_ticket_index += 1;
                 low_mid += 1;
 
-                send_winning(LOW_MID_PRIZE(), player_address, 4, collection_address, 4, token_wallet_address);
+                send_winning(LOW_MID_PRIZE(), qid, player_address, 4, collection_address, 4, token_wallet_address);
                 token_balance = token_balance - LOW_MID_PRIZE();
 
                 cell new_ref = begin_cell()
@@ -348,7 +348,7 @@ int token_balance
                 next_ticket_index += 1;
                 low += 1;
 
-                send_winning(LOW_PRIZE(), player_address, 5, collection_address, 5, token_wallet_address);
+                send_winning(LOW_PRIZE(), qid, player_address, 5, collection_address, 5, token_wallet_address);
                 token_balance = token_balance - LOW_PRIZE();
 
                 cell new_ref = begin_cell()
@@ -371,7 +371,7 @@ int token_balance
                 next_ticket_index += 1;
                 mini += 1;
 
-                send_winning(MINI_PRIZE(), player_address, 6, collection_address, 6, token_wallet_address);
+                send_winning(MINI_PRIZE(), qid, player_address, 6, collection_address, 6, token_wallet_address);
                 token_balance = token_balance - MINI_PRIZE();
 
                 cell new_ref = begin_cell()
@@ -390,17 +390,16 @@ int token_balance
 
         next_ticket_index += 1;
 
-        send_winning(0, player_address, 7, collection_address, 7, token_wallet_address);
+        send_winning(0, qid, player_address, 7, collection_address, 7, token_wallet_address);
 
         store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance);
 
         return();
     }
 
-    ;;int op = in_msg_body~load_uint(32);
-    ;;int query_id = in_msg_body~load_uint(64);
+    ;; parse op and query_id for admin operations
     in_msg_body~load_uint(32);
-    in_msg_body~load_uint(64);
+    int qid = in_msg_body~load_uint(64);
 
     if (op == 2) { ;; withdrawal
         throw_unless(401, equal_slices(sender_address, admin_address));
@@ -438,7 +437,7 @@ int token_balance
     int low = counters_slice~load_uint(16);
     int mini = counters_slice~load_uint(16);
 
-    send_winning(JACKPOT_PRIZE(), winner, 0, collection_address, 0,token_wallet_address);
+    send_winning(JACKPOT_PRIZE(), qid, winner, 0, collection_address, 0,token_wallet_address);
     token_balance = token_balance - JACKPOT_PRIZE();
     jp += 1;
 
@@ -469,7 +468,7 @@ int token_balance
     int requested   = in_msg_body~load_uint(128);
     int amount      = (requested == 0) ? freeTokens : min(requested, freeTokens);
     token_balance   = token_balance - amount;
-    send_usdt(amount, admin_address, token_wallet_address);
+    send_usdt(amount, qid, admin_address, token_wallet_address);
     store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance);
     return();
     }
