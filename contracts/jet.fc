@@ -131,7 +131,7 @@ int token_balance
                 .end_cell();
 
             var refund_msg = begin_cell()
-                .store_uint(0x10, 6)
+                .store_uint(0x18, 6)
                 .store_slice(token_wallet_address)
                 .store_coins(1)
                 ;; payload stored in a reference -> body_ref flag must be 1
@@ -233,7 +233,7 @@ int token_balance
                     .end_cell();
 
                 var msg = begin_cell()
-                    .store_uint(0x10, 6)
+                    .store_uint(0x18, 6)
                     .store_slice(admin_address)
                     .store_coins(10000000)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
