@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, toNano } from '@ton/core';
+import { Address, beginCell, Cell, toNano, contractAddress } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
@@ -20,7 +20,37 @@ export async function run(provider: NetworkProvider) {
         refPercent: Number(process.env.REF_PERCENT || '0'), // referral fee in basis points
     };
 
-    const jet = provider.open(Jet.createFromConfig(lotteryConfig, await compile('Jet')));
+    const jetCode = await compile('Jet');
+    const network = provider.network;
+    const jpAmount = process.env.JACKPOT_AMOUNT_TON
+        ? BigInt(process.env.JACKPOT_AMOUNT_TON) * 10n ** 9n   // TON → nanoTON
+        : network === 'mainnet'
+            ? 1_000n * 10n ** 9n   // 1000 TON
+            : 10n    * 10n ** 9n;  // 10 TON for testnet
+
+    const jetStateInit = beginCell()
+        .storeRef(
+            beginCell()
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .endCell(),
+        )
+        .storeUint(0, 64)
+        .storeAddress(collection.address)
+        .storeAddress(Address.parse(lotteryConfig.adminAddress))
+        .storeCoins(toNano(lotteryConfig.price))
+        .storeUint(lotteryConfig.refPercent, 16)
+        .storeUint(jpAmount, 128)  // jp_amount
+        .storeUint(0n, 128)        // locked_jp_coins
+        .endCell();
+
+    const jetInit = { code: jetCode, data: jetStateInit };
+    const jet = provider.open(new Jet(contractAddress(0, jetInit), jetInit));
 
     // await deploy();
     // await setLotteryAddress();

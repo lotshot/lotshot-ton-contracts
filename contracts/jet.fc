@@ -80,7 +80,7 @@
 
                 ;; Reserve the configured jackpot once the first ticket is sold
                 if (locked_jp_coins == 0) {
-                        locked_jp_coins = jackpot_amount;   ;; e.g. 1 000 TON on mainnet, 10 TON on testnet
+                        locked_jp_coins := jackpot_amount;  ;; first ticket → lock jackpot reserve
                 }
 
                 if (slice_bits(in_msg_body) == 267) {
@@ -267,8 +267,8 @@
                 throw_unless(401, equal_slices(sender_address, admin_address));
                 int free_balance = my_balance - locked_jp_coins - 50000000;
                 throw_unless(403, free_balance > 0);
-                int requested = in_msg_body~load_uint(64); ;; 0 = withdraw all free
-                int amount_to_send = (requested == 0) ? free_balance : min(requested, free_balance);
+                ;; always send the full free balance; partial withdrawal is not supported
+                int amount_to_send := free_balance;
 
                 var msg = begin_cell()
                         .store_uint(0x18, 6)
@@ -358,6 +358,6 @@
                 int locked_jp_coins
         ) = load_data();
         ;; If the Jackpot transfer bounced, restore the reserve
-        locked_jp_coins = jackpot_amount;
+        locked_jp_coins := jackpot_amount;  ;; restore reserve after bounced jackpot
         store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins);
 }
