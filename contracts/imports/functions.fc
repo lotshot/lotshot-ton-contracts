@@ -25,7 +25,7 @@ int   query_id,         ;; query id for tracking
 slice player,           ;; player address
 int   prize_code,       ;; 0..7
 slice collection_addr,  ;; NFT-collection
-int   content_id,       ;; unique ID (can use next_ticket)
+int   content_id,       ;; non-negative ID (can use next_ticket)
 slice token_wallet      ;; contract's Jetton wallet
 ) impure inline {
 
