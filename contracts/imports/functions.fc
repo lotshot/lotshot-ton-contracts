@@ -4,15 +4,15 @@
 cell generate_nft_content(int value, slice owner) {
     builder result = begin_cell();
 
+    throw_unless(400, value >= 0);
+
     int divisor = 1;
     while (value / divisor >= 10) { divisor *= 10; }
 
     do {
         (int digit, value) = divmod(value, divisor);
         divisor /= 10;
-        int char = 0;
-        if (digit < 10) { char = 48 + digit; } else { char = 87 + digit; }
-        ;;         '0' char code ^^       'a' char code - 10 ^^
+        int char = 48 + digit;
         result = result.store_uint(char, 8);
     } until (divisor == 0);
 
