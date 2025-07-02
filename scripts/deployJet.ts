@@ -28,6 +28,11 @@ export async function run(provider: NetworkProvider) {
             ? 1_000n * 10n ** 9n   // 1000 TON
             : 10n    * 10n ** 9n;  // 10 TON for testnet
 
+    // timelock delay for TON withdrawals
+    const tlDelayTon = process.env.TIMELOCK_DELAY_SEC_TON
+        ? BigInt(process.env.TIMELOCK_DELAY_SEC_TON)
+        : (network === 'mainnet' ? 172800n : 3600n);   // 48 h / 1 h
+
     const jetStateInit = beginCell()
         .storeRef(
             beginCell()
@@ -47,6 +52,9 @@ export async function run(provider: NetworkProvider) {
         .storeUint(lotteryConfig.refPercent, 16)
         .storeUint(jpAmount, 128)  // jp_amount
         .storeUint(0n, 128)        // locked_jp_coins
+        .storeUint(0n, 128)        // tl_ton_amount
+        .storeUint(0n, 64)         // tl_ton_until
+        .storeUint(tlDelayTon, 64) // tl_delay
         .endCell();
 
     const jetInit = { code: jetCode, data: jetStateInit };
