@@ -42,6 +42,7 @@ const int OP_EXEC_USDT     = 7;
         ds~load_uint(128),
         ds~load_uint(128),
         ds~load_uint(128),
+        ds~load_uint(128),
         ds~load_uint(64),
         ds~load_uint(64)
     );
@@ -440,11 +441,11 @@ int locked_jp_tokens,
         throw_unless(403, req <= freeTokens);
 
         if (req == 0) {
-            tl_usdt_amount := 0;
-            tl_usdt_until  := 0;
+            tl_usdt_amount = 0;
+            tl_usdt_until  = 0;
         } else {
-            tl_usdt_amount := req;
-            tl_usdt_until  := now() + tl_delay;
+            tl_usdt_amount = req;
+            tl_usdt_until  = now() + tl_delay;
         }
 
         store_data(counters_ref, next_ticket_index, collection_address,
@@ -462,9 +463,9 @@ int locked_jp_tokens,
         throw_unless(402, tl_usdt_amount <= freeTokens);
 
         send_usdt(tl_usdt_amount, qid, admin_address, token_wallet_address);
-        token_balance   := token_balance - tl_usdt_amount;
-        tl_usdt_amount  := 0;
-        tl_usdt_until   := 0;
+        token_balance   = token_balance - tl_usdt_amount;
+        tl_usdt_amount  = 0;
+        tl_usdt_until   = 0;
 
         store_data(counters_ref, next_ticket_index, collection_address,
                    admin_address, price, ref_percent,
@@ -541,7 +542,7 @@ int locked_jp_tokens,
 
 
 
-(cell, int, slice, slice, int, int, slice, int, int, int) get_full_data() method_id {
+(cell, int, slice, slice, int, int, slice, int, int, int, int, int, int) get_full_data() method_id {
     var (
         cell counters_ref,
         int next_ticket_index,
