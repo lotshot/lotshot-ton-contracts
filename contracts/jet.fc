@@ -221,11 +221,11 @@ int token_balance
                 throw_unless(402, token_balance >= locked_jp_tokens);
 
                 ;; automatic payout to ticket sender
-                send_winning(jp_amount, sender_wallet, 0, collection_address, 0, token_wallet_address);
+                send_winning(jp_amount, qid, player_address, 0, collection_address, 0, token_wallet_address);
 
-                token_balance    := token_balance - jp_amount;   ;; USDT balance update
-                locked_jp_tokens := 0;      ;; reserve released
-                jp               := 1;      ;; jackpot claimed
+                token_balance    = token_balance - jp_amount;   ;; USDT balance update
+                locked_jp_tokens = 0;      ;; reserve released
+                jp               = 1;      ;; jackpot claimed
                 next_ticket_index += 1;
 
                 ;; persist state
