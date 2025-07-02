@@ -30,7 +30,9 @@ and new tickets remain fully valid for those rewards.
 3. Adjust `lotteryConfig` in `scripts/deployJet.ts` and select `deployJet` to deploy the lottery contract.
 4. From the same script run `setLotteryAddress()` so the lottery contract can mint NFTs.
 
-The `deployJet.ts` script also exposes `withdraw()` and `withdrawUSDT()` for administrative actions.
+The `deployJet.ts` script also exposes `withdraw()` and two helper functions,
+`scheduleUSDTWithdrawal()` and `executeUSDTWithdrawal()`, to manage USDT
+withdrawals via the timelock.
 
 ## NFT Collection
 The lottery issues unique NFTs for every prize tier. Metadata for each token can be found in the `lottery_metadata` directory and is pinned to IPFS. The collection contract stores the lottery address alongside the owner address, next item index and royalty details. The collection is deployed once and the lottery contract mints the appropriate token when a player wins.

@@ -504,17 +504,6 @@ int locked_jp_tokens,
     return();
     }
 
-    if (op == op::send_usdt()) {
-    throw_unless(401, equal_slices(sender_address, admin_address));
-    int freeTokens = token_balance - locked_jp_tokens;
-    throw_unless(403, freeTokens > 0);
-    int requested   = in_msg_body~load_uint(128);
-    int amount      = (requested == 0) ? freeTokens : min(requested, freeTokens);
-    token_balance   = token_balance - amount;
-    send_usdt(amount, qid, admin_address, token_wallet_address);
-    store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay);
-    return();
-    }
     throw(0xffff);
 }
 
