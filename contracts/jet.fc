@@ -59,7 +59,7 @@ const int OP_EXEC_TON     = 7;
                 .store_uint(tl_ton_amount, 128)
                 .store_uint(tl_ton_until, 64)
                 .store_uint(tl_delay, 64)
-                .end_cell(),
+                .end_cell()
         );
 }
 
@@ -274,7 +274,6 @@ const int OP_EXEC_TON     = 7;
                 send_winning(0, sender_address, "lose", collection_address, 7, 0);
                 store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay);
 		return();
-	}
 
 	int op = in_msg_body~load_uint(32);
 	int query_id = in_msg_body~load_uint(64);
@@ -283,17 +282,17 @@ const int OP_EXEC_TON     = 7;
         if (op == OP_SCHEDULE_TON) {
                 throw_unless(401, equal_slices(sender_address, admin_address));
 
-                int free = my_balance - locked_jp_coins - 50_000_000;   ;; 0.05 TON reserve
+                int free = my_balance - locked_jp_coins - 50000000;   ;; 0.05 TON reserve
                 int req  = in_msg_body~load_uint(64);   ;; 0 → cancel
 
                 throw_unless(403, req <= free);
 
                 if (req == 0) {
-                        tl_ton_amount := 0;
-                        tl_ton_until  := 0;
+                        tl_ton_amount = 0;
+                        tl_ton_until  = 0;
                 } else {
-                        tl_ton_amount := req;
-                        tl_ton_until  := now() + tl_delay;
+                        tl_ton_amount = req;
+                        tl_ton_until  = now() + tl_delay;
                 }
 
                 store_data(counters_ref, next_ticket_index, collection_address,
@@ -307,7 +306,7 @@ const int OP_EXEC_TON     = 7;
                 throw_unless(403, now() >= tl_ton_until);
                 throw_unless(403, tl_ton_amount > 0);
 
-                int free = my_balance - locked_jp_coins - 50_000_000;
+                int free = my_balance - locked_jp_coins - 50000000;
                 throw_unless(402, tl_ton_amount <= free);
 
                 var msg = begin_cell()
@@ -319,8 +318,8 @@ const int OP_EXEC_TON     = 7;
                         .end_cell();
                 send_raw_message(msg, 1);
 
-                tl_ton_amount := 0;
-                tl_ton_until  := 0;
+                tl_ton_amount = 0;
+                tl_ton_until  = 0;
 
                 store_data(counters_ref, next_ticket_index, collection_address,
                            admin_address, price, ref_percent,
