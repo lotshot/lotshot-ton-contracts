@@ -75,6 +75,8 @@ export async function run(provider: NetworkProvider) {
     // await withdraw();               // Withdraw TON to admin address
     // await scheduleUSDTWithdrawal(); // Schedule USDT withdrawal
     // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
+    // await scheduleAdminChange();    // Schedule admin change
+    // await executeAdminChange();     // Execute scheduled admin change
 
 
 
@@ -133,6 +135,38 @@ export async function run(provider: NetworkProvider) {
         if (confirm === 'y' || confirm === 'yes') {
             await jet.sendExecuteUSDT(provider.sender(), toNano('0.1'));
             console.log('✅ Scheduled withdrawal executed');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
+    async function scheduleAdminChange() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const newAdmin = await ask('New admin address: ');
+        console.log(`Schedule admin change to ${newAdmin}`);
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendScheduleAdminChange(provider.sender(), Address.parse(newAdmin), toNano('0.1'));
+            console.log('✅ Admin change scheduled');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
+    async function executeAdminChange() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const confirm = (await ask('Execute scheduled admin change? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendExecuteAdminChange(provider.sender(), toNano('0.1'));
+            console.log('✅ Scheduled admin change executed');
         } else {
             console.log('Canceled');
         }
