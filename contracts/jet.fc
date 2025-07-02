@@ -100,10 +100,99 @@ const int OP_EXEC_ADMIN     = 8;
                 slice new_admin_address,
                 int tl_admin_until
         ) = load_data();
-                if (equal_slices(sender_address, admin_address)) {
-                        return();
+
+        if (equal_slices(sender_address, admin_address)) {
+                int op = in_msg_body~load_uint(32);
+                int query_id = in_msg_body~load_uint(64);
+
+                if (op == OP_SCHEDULE_TON) {
+                        throw_unless(401, equal_slices(sender_address, admin_address));
+
+                        int free = my_balance - locked_jp_coins - 50000000;   ;; 0.05 TON reserve
+                        int req  = in_msg_body~load_uint(64);   ;; 0 → cancel
+
+                        throw_unless(403, req <= free);
+
+                        if (req == 0) {
+                                tl_ton_amount = 0;
+                                tl_ton_until  = 0;
+                        } else {
+                                tl_ton_amount = req;
+                                tl_ton_until  = now() + tl_delay;
+                        }
+
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   new_admin_address, tl_admin_until);
+                        return ();
                 }
 
+                if (op == OP_EXEC_TON) {
+                        throw_unless(403, now() >= tl_ton_until);
+                        throw_unless(403, tl_ton_amount > 0);
+
+                        int free = my_balance - locked_jp_coins - 50000000;
+                        throw_unless(402, tl_ton_amount <= free);
+
+                        var msg = begin_cell()
+                                .store_uint(0x18, 6)
+                                .store_slice(admin_address)
+                                .store_coins(tl_ton_amount)
+                                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                                .store_uint(0, 32)
+                                .end_cell();
+                        send_raw_message(msg, 1);
+
+                        tl_ton_amount = 0;
+                        tl_ton_until  = 0;
+
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   new_admin_address, tl_admin_until);
+                        return ();
+                }
+                if (op == OP_SCHEDULE_ADMIN) {
+                        throw_unless(401, equal_slices(sender_address, admin_address));
+
+                        slice new_addr = in_msg_body~load_msg_addr();
+                        if (slice_bits(new_addr) == 2) {
+                                new_admin_address = admin_address;
+                                tl_admin_until = 0;
+                        } else {
+                                new_admin_address = new_addr;
+                                tl_admin_until  = now() + tl_delay;
+                        }
+
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   new_admin_address, tl_admin_until);
+                        return ();
+                }
+
+                if (op == OP_EXEC_ADMIN) {
+                        throw_unless(401, equal_slices(sender_address, admin_address));
+                        throw_unless(403, now() >= tl_admin_until);
+
+                        admin_address = new_admin_address;
+                        tl_admin_until = 0;
+
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   admin_address, tl_admin_until);
+                        return ();
+                }
+
+                ;; unknown op code
+                throw(0xffff);
+        }
                 throw_unless(400, msg_value == price);
                 int ticket_value = msg_value;
 
@@ -287,100 +376,6 @@ const int OP_EXEC_ADMIN     = 8;
                 store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 		return();
 
-	int op = in_msg_body~load_uint(32);
-	int query_id = in_msg_body~load_uint(64);
-
-
-        if (op == OP_SCHEDULE_TON) {
-                throw_unless(401, equal_slices(sender_address, admin_address));
-
-                int free = my_balance - locked_jp_coins - 50000000;   ;; 0.05 TON reserve
-                int req  = in_msg_body~load_uint(64);   ;; 0 → cancel
-
-                throw_unless(403, req <= free);
-
-                if (req == 0) {
-                        tl_ton_amount = 0;
-                        tl_ton_until  = 0;
-                } else {
-                        tl_ton_amount = req;
-                        tl_ton_until  = now() + tl_delay;
-                }
-
-                store_data(counters_ref, next_ticket_index, collection_address,
-                           admin_address, price, ref_percent,
-                           jackpot_amount, locked_jp_coins,
-                           tl_ton_amount, tl_ton_until, tl_delay,
-                           new_admin_address, tl_admin_until);
-                return ();
-        }
-
-        if (op == OP_EXEC_TON) {
-                throw_unless(403, now() >= tl_ton_until);
-                throw_unless(403, tl_ton_amount > 0);
-
-                int free = my_balance - locked_jp_coins - 50000000;
-                throw_unless(402, tl_ton_amount <= free);
-
-                var msg = begin_cell()
-                        .store_uint(0x18, 6)
-                        .store_slice(admin_address)
-                        .store_coins(tl_ton_amount)
-                        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                        .store_uint(0, 32)
-                        .end_cell();
-                send_raw_message(msg, 1);
-
-                tl_ton_amount = 0;
-                tl_ton_until  = 0;
-
-                store_data(counters_ref, next_ticket_index, collection_address,
-                           admin_address, price, ref_percent,
-                           jackpot_amount, locked_jp_coins,
-                           tl_ton_amount, tl_ton_until, tl_delay,
-                           new_admin_address, tl_admin_until);
-                return ();
-        }
-        if (op == OP_SCHEDULE_ADMIN) {
-                throw_unless(401, equal_slices(sender_address, admin_address));
-
-                slice new_addr = in_msg_body~load_msg_addr();
-                if (slice_bits(new_addr) == 2) {
-                        new_admin_address = admin_address;
-                        tl_admin_until = 0;
-                } else {
-                        new_admin_address = new_addr;
-                        tl_admin_until  = now() + tl_delay;
-                }
-
-                store_data(counters_ref, next_ticket_index, collection_address,
-                           admin_address, price, ref_percent,
-                           jackpot_amount, locked_jp_coins,
-                           tl_ton_amount, tl_ton_until, tl_delay,
-                           new_admin_address, tl_admin_until);
-                return ();
-        }
-
-        if (op == OP_EXEC_ADMIN) {
-                throw_unless(401, equal_slices(sender_address, admin_address));
-                throw_unless(403, now() >= tl_admin_until);
-
-                admin_address = new_admin_address;
-                tl_admin_until = 0;
-
-                store_data(counters_ref, next_ticket_index, collection_address,
-                           admin_address, price, ref_percent,
-                           jackpot_amount, locked_jp_coins,
-                           tl_ton_amount, tl_ton_until, tl_delay,
-                           admin_address, tl_admin_until);
-                return ();
-        }
-
-
-
-
-        ;; unknown op code
-        throw(0xffff);
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
