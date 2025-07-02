@@ -72,8 +72,10 @@ export async function run(provider: NetworkProvider) {
     // await setTokenWallet();
 
 
-    // await withdraw();     // Withdraw TON to admin address
-    // await withdrawUSDT(); // Withdraw USDT to any address
+    // await withdraw();               // Withdraw TON to admin address
+    // await withdrawUSDT();           // Withdraw USDT to admin address
+    // await scheduleUSDTWithdrawal(); // Schedule USDT withdrawal
+    // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
 
 
     // finishRound();
@@ -109,22 +111,52 @@ export async function run(provider: NetworkProvider) {
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
-        const to = await ask('Recipient address: ');
         const amountStr = await ask('Amount (USDT): ');
 
-        console.log(`Recipient: ${to}`);
         console.log(`Amount: ${amountStr} USDT`);
-        const confirm = (await ask('Confirm send? (y/N) ')).toLowerCase();
+        const confirm = (await ask('Confirm send to admin? (y/N) ')).toLowerCase();
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
             await jet.sendUSDT(
                 provider.sender(),
-                Address.parse(to),
+                Address.parse(lotteryConfig.adminAddress),
                 BigInt(amountStr),
                 toNano('0.1'),
             );
-            console.log('✅ USDT withdrawal sent');
+            console.log('✅ USDT withdrawal sent to admin');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
+    async function scheduleUSDTWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const amountStr = await ask('Amount to schedule (USDT): ');
+        console.log(`Schedule withdrawal of ${amountStr} USDT`);
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendScheduleUSDT(provider.sender(), BigInt(amountStr), toNano('0.1'));
+            console.log('✅ Withdrawal scheduled');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
+    async function executeUSDTWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const confirm = (await ask('Execute scheduled withdrawal? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendExecuteUSDT(provider.sender(), toNano('0.1'));
+            console.log('✅ Scheduled withdrawal executed');
         } else {
             console.log('Canceled');
         }
@@ -136,14 +168,7 @@ export async function run(provider: NetworkProvider) {
         await jet.sendWithdraw(provider.sender(), toNano('0.01'));
     }
 
-    // Stops the lottery contract and mints an NFT for the winner
-    async function finishRound(winner_address: string) {
-        await jet.sendFinishRound(
-            provider.sender(),
-            Address.parse(winner_address),
-            toNano(0.05),
-        );
-    }
+    // finishRound() disabled
 
     await provider.waitForDeploy(jet.address);
 }
