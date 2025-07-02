@@ -1,6 +1,8 @@
 #include "imports/stdlib.fc";
 #include "imports/functions.fc";
 
+;; Jackpot is paid automatically; no admin trigger exists.
+
 int JACKPOT_PRIZE() asm "10000 PUSHINT"; ;; 10,000 tokens
 int MAJOR_PRIZE() asm "1800 PUSHINT";    ;; 1,800 tokens
 int HIGH_PRIZE() asm "700 PUSHINT";      ;; 700 tokens
@@ -210,17 +212,23 @@ int token_balance
         int mini = counters_slice~load_uint(16);
 
         if (jp > 0) {
-        ;;    return();
+            return ();
         }
 
         if (x == 0) { ;; Jackpot 1/12000
-            if (jp == 0) { ;; Jackpot has not been claimed yet
+            if (jp == 0) {
+                ;; balance guard
                 throw_unless(402, token_balance >= locked_jp_tokens);
+
+                ;; automatic payout to ticket sender
+                send_winning(jp_amount, sender_wallet, 0, collection_address, 0, token_wallet_address);
+
+                token_balance    := token_balance - jp_amount;   ;; USDT balance update
+                locked_jp_tokens := 0;      ;; reserve released
+                jp               := 1;      ;; jackpot claimed
                 next_ticket_index += 1;
-                 jp += 1;
-                send_winning(jp_amount, qid, player_address, 0, collection_address, 0, token_wallet_address);
-                token_balance  = token_balance - jp_amount;
-                locked_jp_tokens = 0;
+
+                ;; persist state
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
                     .store_uint(major, 16)
@@ -230,24 +238,11 @@ int token_balance
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-
-                var msg = begin_cell()
-                    .store_uint(flag::bounce(), 6)
-                    .store_slice(admin_address)
-                    .store_coins(10000000)
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                    .store_uint(0, 32)
-                    .store_slice("Jackpot winner")
-                    .end_cell();
-
-
-                send_raw_message(msg, 1);
-
-
-                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance);
-                return();
-
-                ;; Send message to admin
+                store_data(new_ref, next_ticket_index, collection_address,
+                           admin_address, price, ref_percent,
+                           token_wallet_address, jp_amount, locked_jp_tokens,
+                           token_balance);
+                return ();
             }
         }
 
@@ -441,36 +436,6 @@ int token_balance
     return();
     }
 
-    if (op == 4) { ;; send nft to jackpot winner
-    throw_unless(401, equal_slices(sender_address, admin_address));
-    slice winner = in_msg_body~load_msg_addr();
-
-    slice counters_slice = counters_ref.begin_parse();
-    int jp = counters_slice~load_uint(16);
-    int major = counters_slice~load_uint(16);
-    int high = counters_slice~load_uint(16);
-    int mid = counters_slice~load_uint(16);
-    int low_mid = counters_slice~load_uint(16);
-    int low = counters_slice~load_uint(16);
-    int mini = counters_slice~load_uint(16);
-
-    send_winning(JACKPOT_PRIZE(), qid, winner, 0, collection_address, 0,token_wallet_address);
-    token_balance = token_balance - JACKPOT_PRIZE();
-    jp += 1;
-
-    cell new_ref = begin_cell()
-    .store_uint(jp, 16)
-    .store_uint(major, 16)
-    .store_uint(high, 16)
-    .store_uint(mid, 16)
-    .store_uint(low_mid, 16)
-    .store_uint(low, 16)
-    .store_uint(mini, 16)
-    .end_cell();
-
-    store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance);
-    return();
-    }
 
     if (op == 5) { ;; set token_wallet_address
     throw_unless(401, equal_slices(sender_address, admin_address));
