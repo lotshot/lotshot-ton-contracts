@@ -30,7 +30,7 @@ and new tickets remain fully valid for those rewards.
 3. Adjust `lotteryConfig` in `scripts/deployJet.ts` and select `deployJet` to deploy the lottery contract.
 4. From the same script run `setLotteryAddress()` so the lottery contract can mint NFTs.
 
-The `deployJet.ts` script also exposes `withdraw()`, `withdrawUSDT()` and `finishRound(winner)` for administrative actions.
+The `deployJet.ts` script also exposes `withdraw()` and `withdrawUSDT()` for administrative actions.
 
 ## NFT Collection
 The lottery issues unique NFTs for every prize tier. Metadata for each token can be found in the `lottery_metadata` directory and is pinned to IPFS. The collection contract stores the lottery address alongside the owner address, next item index and royalty details. The collection is deployed once and the lottery contract mints the appropriate token when a player wins.
@@ -40,7 +40,7 @@ Send a jetton `transfer` to the lottery wallet with the amount equal to `TICKET_
 
 ## Lottery Mechanics
 1. After receiving a payment, the contract generates a random number `x` from 0 to 11 999.
-2. If `x == 0` the contract informs the administrator about a potential jackpot. The admin should call `finishRound(address)`:
+2. If `x == 0` the contract informs the administrator about a potential jackpot.
    - the player receives `JACKPOT_PRIZE` (10 000 jettons) and NFT `0`;
    - the Jackpot counter increases; remaining prize tiers continue as usual.
 3. Otherwise `x` is checked against the ranges below. A prize is issued while the associated counter is below its limit. The table assumes a round of 12 000 tickets.

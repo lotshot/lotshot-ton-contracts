@@ -78,7 +78,6 @@ export async function run(provider: NetworkProvider) {
     // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
 
 
-    // finishRound();
 
 
 
@@ -168,7 +167,6 @@ export async function run(provider: NetworkProvider) {
         await jet.sendWithdraw(provider.sender(), toNano('0.01'));
     }
 
-    // finishRound() disabled
 
     await provider.waitForDeploy(jet.address);
 }
