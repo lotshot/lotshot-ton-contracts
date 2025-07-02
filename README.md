@@ -51,8 +51,10 @@ The `.env` file requires the following fields:
 - `COLLECTION_OWNER` – address that will receive NFT royalties.
 - `ADMIN_ADDRESS` – address of the lottery administrator.
 - `REF_PERCENT` – referral fee in basis points.  
-- `JACKPOT_AMOUNT_TON` – jackpot size in whole TON for the TON lottery  
+- `JACKPOT_AMOUNT_TON` – jackpot size in whole TON for the TON lottery
   (defaults to 1000 TON on mainnet and 10 TON on testnet if unset).
+- `TIMELOCK_DELAY_SEC_TON` – timelock delay (in seconds) for TON withdrawals  
+  (defaults: 172 800 s on mainnet, 3 600 s on testnet).
 
 ## Compiling contracts
 
