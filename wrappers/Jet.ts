@@ -1,5 +1,5 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
-import { OP_SEND_USDT } from './opcodes';
+import { OP_SEND_USDT, OP_SCHEDULE_USDT, OP_EXEC_USDT } from './opcodes';
 
 export type JetConfig = {
     collectionAddress: Address;
@@ -85,6 +85,31 @@ export class Jet implements Contract {
             .storeUint(0, 64)
             .storeAddress(recipient)
             .storeUint(amount, 128)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendScheduleUSDT(provider: ContractProvider, via: Sender, amount: bigint, value: bigint) {
+        const body = beginCell()
+            .storeUint(OP_SCHEDULE_USDT, 32)
+            .storeUint(0, 64)
+            .storeUint(amount, 128)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendExecUSDT(provider: ContractProvider, via: Sender, value: bigint) {
+        const body = beginCell()
+            .storeUint(OP_EXEC_USDT, 32)
+            .storeUint(0, 64)
             .endCell();
         await provider.internal(via, {
             value,

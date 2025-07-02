@@ -109,25 +109,27 @@ export async function run(provider: NetworkProvider) {
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
-        const to = await ask('Recipient address: ');
         const amountStr = await ask('Amount (USDT): ');
 
-        console.log(`Recipient: ${to}`);
         console.log(`Amount: ${amountStr} USDT`);
-        const confirm = (await ask('Confirm send? (y/N) ')).toLowerCase();
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
-            await jet.sendUSDT(
+            await jet.sendScheduleUSDT(
                 provider.sender(),
-                Address.parse(to),
                 BigInt(amountStr),
                 toNano('0.1'),
             );
-            console.log('✅ USDT withdrawal sent');
+            console.log('✅ USDT withdrawal scheduled');
         } else {
             console.log('Canceled');
         }
+    }
+
+    async function execWithdrawUSDT() {
+        await jet.sendExecUSDT(provider.sender(), toNano('0.1'));
+        console.log('✅ USDT withdrawal executed');
     }
 
 
