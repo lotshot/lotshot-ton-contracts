@@ -90,9 +90,13 @@ Select `deployJet` and follow the prompts. Ensure you call `deploy()` and `setLo
 
 - `deploy()` – deploys the lottery contract.
 - `setLotteryAddress()` – grants minting rights to the lottery.
-- `withdraw()` – transfers accumulated TON from the contract (leaves 0.05 TON).
-- `finishRound()` – finalizes the lottery and sends the jackpot NFT.
+- `scheduleWithdraw()` – locks a withdrawal amount that can be claimed after the timelock.
+- `executeWithdraw()` – transfers the scheduled TON amount to the administrator.
 - `changeAdminAddress()` – updates the lottery administrator.
+
+Withdrawals require two steps. First schedule the desired amount with `scheduleWithdraw()`.
+After the delay specified by `TIMELOCK_DELAY_SEC_TON` expires, call `executeWithdraw()`
+to transfer the funds.
 
 Function calls are commented out by default. Uncomment the desired call before running `npm run start`.
 
