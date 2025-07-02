@@ -289,14 +289,6 @@
                 return();
         }
 
-        if (op == 4) { ;; send nft to jackpot winner
-                throw_unless(401, equal_slices(sender_address, admin_address));
-                send_winning(0, in_msg_body~load_msg_addr(), "text", collection_address, 0, query_id);
-                ;; contract block
-                ;; to be finished with load_data
-                ;; jp += 1;
-                return();
-        }
 
         ;; unknown op code
         throw(0xffff);
