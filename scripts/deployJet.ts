@@ -73,7 +73,6 @@ export async function run(provider: NetworkProvider) {
 
 
     // await withdraw();               // Withdraw TON to admin address
-    // await withdrawUSDT();           // Withdraw USDT to admin address
     // await scheduleUSDTWithdrawal(); // Schedule USDT withdrawal
     // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
 
@@ -106,28 +105,6 @@ export async function run(provider: NetworkProvider) {
         console.log('✅ Token wallet address sent to lottery contract');
     }
 
-    async function withdrawUSDT() {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
-
-        const amountStr = await ask('Amount (USDT): ');
-
-        console.log(`Amount: ${amountStr} USDT`);
-        const confirm = (await ask('Confirm send to admin? (y/N) ')).toLowerCase();
-        rl.close();
-
-        if (confirm === 'y' || confirm === 'yes') {
-            await jet.sendUSDT(
-                provider.sender(),
-                Address.parse(lotteryConfig.adminAddress),
-                BigInt(amountStr),
-                toNano('0.1'),
-            );
-            console.log('✅ USDT withdrawal sent to admin');
-        } else {
-            console.log('Canceled');
-        }
-    }
 
     async function scheduleUSDTWithdrawal() {
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
