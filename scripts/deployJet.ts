@@ -62,8 +62,8 @@ export async function run(provider: NetworkProvider) {
 
     // await deploy();
     // await setLotteryAddress();
-    // await withdraw();
-    // finishRound();
+    // await scheduleWithdraw(toNano('1')); // lock 1 TON for withdrawal
+    // await executeWithdraw();
     // changeAdminAddress();
 
     // Deploy the lottery contract
@@ -80,21 +80,21 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Withdraw funds from the lottery contract. Balance must exceed 0.05 TON
-    async function withdraw() {
+    // Schedule a TON withdrawal. Pass 0 to cancel a pending request.
+    async function scheduleWithdraw(amount: bigint) {
         await provider.sender().send({
             to: jet.address,
             value: toNano('0.01'),
-            body: beginCell().storeUint(2, 32).storeUint(0, 64).endCell(),
+            body: beginCell().storeUint(2, 32).storeUint(0, 64).storeUint(amount, 64).endCell(),
         });
     }
 
-    // Stop the lottery contract and mint an NFT for the winner
-    async function finishRound(winner_address: string) {
+    // Execute the previously scheduled withdrawal after the timelock expires
+    async function executeWithdraw() {
         await provider.sender().send({
             to: jet.address,
-            value: toNano(0.05),
-            body: beginCell().storeUint(4, 32).storeUint(0, 64).storeAddress(Address.parse(winner_address)).endCell(),
+            value: toNano('0.01'),
+            body: beginCell().storeUint(7, 32).storeUint(0, 64).endCell(),
         });
     }
 
