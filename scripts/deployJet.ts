@@ -98,16 +98,23 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Change the lottery administrator
-    async function changeAdminAddress(new_admin: string) {
+    // Schedule an admin change. Pass null to cancel a pending request.
+    async function scheduleAdminChange(new_admin: string | null) {
+        const body = beginCell().storeUint(3, 32).storeUint(0, 64);
+        body.storeAddress(new_admin ? Address.parse(new_admin) : null);
         await provider.sender().send({
             to: jet.address,
             value: toNano('0.01'),
-            body: beginCell()
-                .storeUint(3, 32)
-                .storeUint(0, 64)
-                .storeAddress(Address.parse(new_admin))
-                .endCell(),
+            body: body.endCell(),
+        });
+    }
+
+    // Execute the previously scheduled admin change
+    async function executeAdminChange() {
+        await provider.sender().send({
+            to: jet.address,
+            value: toNano('0.01'),
+            body: beginCell().storeUint(8, 32).storeUint(0, 64).endCell(),
         });
     }
 
