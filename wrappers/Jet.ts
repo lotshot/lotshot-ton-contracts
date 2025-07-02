@@ -127,14 +127,6 @@ export class Jet implements Contract {
         });
     }
 
-    async sendFinishRound(provider: ContractProvider, via: Sender, winner: Address, value: bigint) {
-        const body = beginCell().storeUint(4, 32).storeUint(0, 64).storeAddress(winner).endCell();
-        await provider.internal(via, {
-            value,
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body,
-        });
-    }
 
     async getCounters(provider: ContractProvider) {
         const res = await provider.get('get_counters', []);
