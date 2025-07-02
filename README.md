@@ -21,6 +21,8 @@ and new tickets remain fully valid for those rewards.
    - `REF_PERCENT` – referral payout in basis points.
    - `JACKPOT_AMOUNT_USDT` – jackpot size (whole USDT) for the USDT lottery
      (defaults: 10 000 mainnet / 100 testnet).
+   - `TIMELOCK_DELAY_SEC` – timelock delay (in seconds) for USDT withdrawals  
+     (defaults: 172 800 s on mainnet, 3 600 s on testnet).
 
 ## Deployment
 1. Prepare the metadata files `collection.json` and `0.json–7.json`, upload them to IPFS and place the resulting link into `collectionConfig.content`.

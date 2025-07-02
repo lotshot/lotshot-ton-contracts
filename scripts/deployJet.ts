@@ -33,6 +33,11 @@ export async function run(provider: NetworkProvider) {
         ? BigInt(process.env.JACKPOT_AMOUNT_USDT) * 10n ** 9n
         : (network === 'mainnet' ? 10_000n : 100n) * 10n ** 9n;
 
+    // timelock delay (seconds)
+    const tlDelay = process.env.TIMELOCK_DELAY_SEC
+        ? BigInt(process.env.TIMELOCK_DELAY_SEC)
+        : (network === 'mainnet' ? 172800n : 3600n);   // 48h / 1h
+
     const stateInit = beginCell()
         .storeRef(
             beginCell()
@@ -54,6 +59,9 @@ export async function run(provider: NetworkProvider) {
         .storeUint(jpUsdt, 128)   // jp_amount
         .storeUint(0n, 128)       // locked_jp_tokens
         .storeUint(0n, 128)       // token_balance
+        .storeUint(0n, 128)       // tl_usdt_amount
+        .storeUint(0n, 64)        // tl_usdt_until
+        .storeUint(tlDelay, 64)   // tl_delay
         .endCell();
 
     const init = { code, data: stateInit };
