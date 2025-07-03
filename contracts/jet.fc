@@ -29,9 +29,9 @@ const int OP_EXEC_ADMIN     = 8;
                 ds~load_msg_addr(),
                 ds~load_coins(),
                 ds~load_uint(16),
-                ds~load_uint(128),
-                ds~load_uint(128),
-                ds~load_uint(128),
+                ds~load_coins(),
+                ds~load_coins(),
+                ds~load_coins(),
                 ds~load_uint(64),
                 ds~load_uint(64),
                 ds~load_msg_addr(),
@@ -62,9 +62,9 @@ const int OP_EXEC_ADMIN     = 8;
                 .store_slice(admin_address)
                 .store_coins(price)
                 .store_uint(ref_percent, 16)
-                .store_uint(jackpot_amount, 128)
-                .store_uint(locked_jp_coins, 128)
-                .store_uint(tl_ton_amount, 128)
+                .store_coins(jackpot_amount)
+                .store_coins(locked_jp_coins)
+                .store_coins(tl_ton_amount)
                 .store_uint(tl_ton_until, 64)
                 .store_uint(tl_delay, 64)
                 .store_slice(new_admin_address)

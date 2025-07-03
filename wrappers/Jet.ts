@@ -47,12 +47,12 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .storeAddress(Address.parse(config.adminAddress))
             .storeCoins(toNano(config.price))
             .storeUint(config.refPercent, 16)
-            .storeUint(toNano(jackpotAmount), 128)
-            .storeUint(0, 128) // locked_jp_coins
-            .storeUint(0, 128) // tl_ton_amount
+            .storeCoins(toNano(jackpotAmount))
+            .storeCoins(0) // locked_jp_coins
+            .storeCoins(0) // tl_ton_amount
             .storeUint(0, 64) // tl_ton_until
             .storeUint(timelockDelay, 64)
-            .storeAddress(Address.parse(config.adminAddress)) // new_admin_address
+            .storeAddress(null) // new_admin_address
             .storeUint(0, 64) // tl_admin_until
             .endCell()
     );
