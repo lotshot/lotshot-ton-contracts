@@ -23,7 +23,7 @@ describe('Jet', () => {
 
     it('should deploy', async () => {});
 
-    it.skip('pays out prizes', async () => {
+    it('pays out prizes', async () => {
         const collection = await blockchain.treasury('collection');
 
         const jpAmount = toNano('10');
