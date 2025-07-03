@@ -143,7 +143,7 @@ export class Jet implements Contract {
         const result = await provider.get('get_full_data', []);
         return {
             counters: result.stack.readCell(),
-            nextTicketIndex: result.stack.readNumber(),
+            nextTicketIndex: result.stack.readBigNumber(),
             collectionAddress: result.stack.readAddress(),
             adminAddress: result.stack.readAddress(),
             price: result.stack.readBigNumber(),
