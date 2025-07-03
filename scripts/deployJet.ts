@@ -2,6 +2,7 @@ import { Address, beginCell, Cell, toNano, contractAddress } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
+import * as readline from 'readline';
 
 // Collection parameters
 export const collectionConfig = {
@@ -62,9 +63,9 @@ export async function run(provider: NetworkProvider) {
 
     // await deploy();
     // await setLotteryAddress();
-    // await scheduleWithdraw(toNano('1')); // lock 1 TON for withdrawal
-    // await executeWithdraw();
-    // changeAdminAddress();
+    // await scheduleTONWithdrawal(); // schedule withdrawal interactively
+    // await executeTONWithdrawal();
+    // await changeAdminAddress();
 
     // Deploy the lottery contract
     async function deploy() {
@@ -80,48 +81,85 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
-    // Schedule a TON withdrawal. Pass 0 to cancel a pending request.
-    async function scheduleWithdraw(amount: bigint) {
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano('0.01'),
-            body: beginCell().storeUint(2, 32).storeUint(0, 64).storeUint(amount, 64).endCell(),
-        });
+    // Schedule a TON withdrawal with a prompt
+    async function scheduleTONWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const amount = await ask('Amount to schedule (nanoTON, 0 to cancel): ');
+        console.log(`Schedule withdrawal of ${amount} nanoTON`);
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendScheduleTON(provider.sender(), BigInt(amount), toNano('0.01'));
+            console.log('✅ Withdrawal scheduled');
+        } else {
+            console.log('Canceled');
+        }
     }
 
     // Execute the previously scheduled withdrawal after the timelock expires
-    async function executeWithdraw() {
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano('0.01'),
-            body: beginCell().storeUint(7, 32).storeUint(0, 64).endCell(),
-        });
+    async function executeTONWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const confirm = (await ask('Execute scheduled TON withdrawal? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendExecuteTON(provider.sender(), toNano('0.01'));
+            console.log('✅ Scheduled withdrawal executed');
+        } else {
+            console.log('Canceled');
+        }
     }
 
-    // Schedule an admin change. Pass null to cancel a pending request.
-    async function scheduleAdminChange(new_admin: string | null) {
-        const body = beginCell().storeUint(3, 32).storeUint(0, 64);
-        body.storeAddress(new_admin ? Address.parse(new_admin) : null);
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano('0.01'),
-            body: body.endCell(),
-        });
-    }
+    // Schedule an admin change with a prompt
+    async function scheduleAdminChange() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
+        const newAdmin = await ask('New admin address (empty to cancel): ');
+        console.log(`Schedule admin change to ${newAdmin || 'cancel'}`);
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            const addr = newAdmin ? Address.parse(newAdmin) : null;
+            await jet.sendScheduleAdminChange(provider.sender(), addr, toNano('0.01'));
+            console.log('✅ Admin change scheduled');
+        } else {
+            console.log('Canceled');
+        }
+    }
 
     // Execute the previously scheduled admin change
     async function executeAdminChange() {
-        await provider.sender().send({
-            to: jet.address,
-            value: toNano('0.01'),
-            body: beginCell().storeUint(8, 32).storeUint(0, 64).endCell(),
-        });
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const confirm = (await ask('Execute scheduled admin change? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendExecuteAdminChange(provider.sender(), toNano('0.01'));
+            console.log('✅ Scheduled admin change executed');
+        } else {
+            console.log('Canceled');
+        }
     }
 
     // Schedule and execute an admin change after the timelock delay
-    async function changeAdminAddress(new_admin: string) {
-        await scheduleAdminChange(new_admin);
+    async function changeAdminAddress() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const newAdmin = await ask('New admin address for immediate change: ');
+        rl.close();
+
+        const addr = newAdmin ? Address.parse(newAdmin) : null;
+        await jet.sendScheduleAdminChange(provider.sender(), addr, toNano('0.01'));
         console.log(
             `Admin change scheduled. Waiting ${tlDelayTon} seconds before execution...`,
         );
