@@ -1,4 +1,4 @@
-import { Address, beginCell, Cell, toNano, contractAddress } from '@ton/core';
+import { Address, beginCell, toNano } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { compile, NetworkProvider } from '@ton/blueprint';
@@ -38,36 +38,23 @@ export async function run(provider: NetworkProvider) {
         ? BigInt(process.env.TIMELOCK_DELAY_SEC)
         : (network === 'mainnet' ? 172800n : 3600n);   // 48h / 1h
 
-    const stateInit = beginCell()
-        .storeRef(
-            beginCell()
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .storeUint(0, 16)
-                .endCell(),
-        )
-        .storeUint(0, 64)
-        .storeAddress(lotteryConfig.collectionAddress)
-        .storeAddress(Address.parse(lotteryConfig.adminAddress))
-        .storeUint(lotteryConfig.price, 128)
-        .storeUint(lotteryConfig.refPercent, 16)
-        .storeAddress(lotteryConfig.tokenAddress)
-        .storeUint(jpUsdt, 128)   // jp_amount
-        .storeUint(0n, 128)       // locked_jp_tokens
-        .storeUint(0n, 128)       // token_balance
-        .storeUint(0n, 128)       // tl_usdt_amount
-        .storeUint(0n, 64)        // tl_usdt_until
-        .storeUint(tlDelay, 64)   // tl_delay
-        .storeUint(0n, 128)       // tl_ton_amount
-        .storeUint(0n, 64)        // tl_ton_until
-        .endCell();
+    const jetConfig = {
+        collectionAddress: lotteryConfig.collectionAddress,
+        adminAddress: lotteryConfig.adminAddress,
+        price: lotteryConfig.price,
+        refPercent: lotteryConfig.refPercent,
+        tokenAddress: lotteryConfig.tokenAddress,
+        jpAmount: jpUsdt,
+        lockedJpTokens: 0n,
+        tokenBalance: 0n,
+        tlUsdtAmount: 0n,
+        tlUsdtUntil: 0n,
+        tlDelay,
+        tlTonAmount: 0n,
+        tlTonUntil: 0n,
+    };
 
-    const init = { code, data: stateInit };
-    const jet = provider.open(new Jet(contractAddress(0, init), init));
+    const jet = provider.open(Jet.createFromConfig(jetConfig, code));
 
     // await deploy();
     // await setLotteryAddress();
