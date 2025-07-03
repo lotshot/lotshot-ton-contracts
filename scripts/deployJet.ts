@@ -19,6 +19,12 @@ export async function run(provider: NetworkProvider) {
         adminAddress: process.env.ADMIN_ADDRESS || '', // lottery administrator address
         price: 0.25, // ticket price
         refPercent: Number(process.env.REF_PERCENT || '0'), // referral fee in basis points
+        jackpotAmount: process.env.JACKPOT_AMOUNT_TON
+            ? Number(process.env.JACKPOT_AMOUNT_TON)
+            : undefined,
+        timelockDelay: process.env.TIMELOCK_DELAY_SEC_TON
+            ? Number(process.env.TIMELOCK_DELAY_SEC_TON)
+            : undefined,
     };
 
     const jetCode = await compile('Jet');
@@ -30,6 +36,8 @@ export async function run(provider: NetworkProvider) {
                 adminAddress: lotteryConfig.adminAddress,
                 price: lotteryConfig.price,
                 refPercent: lotteryConfig.refPercent,
+                jackpotAmount: lotteryConfig.jackpotAmount,
+                timelockDelay: lotteryConfig.timelockDelay,
             },
             jetCode,
         ),

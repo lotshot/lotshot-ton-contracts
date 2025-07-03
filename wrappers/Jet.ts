@@ -21,27 +21,41 @@ export type JetConfig = {
     adminAddress: string;
     price: number;
     refPercent: number;
+    jackpotAmount?: number; // TON
+    timelockDelay?: number; // seconds
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
-    return beginCell()
-        .storeRef(
-            beginCell()
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
+    const jackpotAmount = config.jackpotAmount ?? 10_000;
+    const timelockDelay = config.timelockDelay ?? 86_400;
+
+    const counters = beginCell()
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .endCell();
+
+    return (
+        beginCell()
+            .storeRef(counters)
+            .storeUint(0, 64) // next_ticket_index
+            .storeAddress(config.collectionAddress)
+            .storeAddress(Address.parse(config.adminAddress))
+            .storeCoins(toNano(config.price))
+            .storeUint(config.refPercent, 16)
+            .storeUint(toNano(jackpotAmount), 128)
+            .storeUint(0, 128) // locked_jp_coins
+            .storeUint(0, 128) // tl_ton_amount
+            .storeUint(0, 64) // tl_ton_until
+            .storeUint(timelockDelay, 64)
+            .storeAddress(Address.parse(config.adminAddress)) // new_admin_address
+            .storeUint(0, 64) // tl_admin_until
             .endCell()
-        )
-        .storeUint(0, 64)
-        .storeAddress(config.collectionAddress)
-        .storeAddress(Address.parse(config.adminAddress))
-        .storeCoins(toNano(config.price))
-        .storeUint(config.refPercent, 16)
-        .endCell()
+    );
 }
 
 export class Jet implements Contract {
