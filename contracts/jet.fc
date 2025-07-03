@@ -106,7 +106,6 @@ const int OP_EXEC_ADMIN     = 8;
         if (flags & 1) {
                 return();
         }
-
         accept_message();
 
         slice sender_address = cs~load_msg_addr();
