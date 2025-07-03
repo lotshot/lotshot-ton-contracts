@@ -22,21 +22,48 @@ export async function run(provider: NetworkProvider) {
     };
 
     const jetCode = await compile('Jet');
+    const network = provider.network();
+    const jpAmount = process.env.JACKPOT_AMOUNT_TON
+        ? BigInt(process.env.JACKPOT_AMOUNT_TON) * 10n ** 9n   // TON → nanoTON
+        : network === 'mainnet'
+            ? 1_000n * 10n ** 9n   // 1000 TON
+            : 10n    * 10n ** 9n;  // 10 TON for testnet
 
-    const jet = provider.open(
-        Jet.createFromConfig(
-            {
-                collectionAddress: collection.address,
-                adminAddress: lotteryConfig.adminAddress,
-                price: lotteryConfig.price,
-                refPercent: lotteryConfig.refPercent,
-            },
-            jetCode,
-        ),
-    );
+    // timelock delay for TON withdrawals
+    const tlDelayTon = process.env.TIMELOCK_DELAY_SEC_TON
+        ? BigInt(process.env.TIMELOCK_DELAY_SEC_TON)
+        : (network === 'mainnet' ? 172800n : 3600n);   // 48 h / 1 h
 
-    // await deploy();
-    // await setLotteryAddress();
+    const jetStateInit = beginCell()
+        .storeRef(
+            beginCell()
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .endCell(),
+        )
+        .storeUint(0, 64)
+        .storeAddress(collection.address)
+        .storeAddress(Address.parse(lotteryConfig.adminAddress))
+        .storeCoins(toNano(lotteryConfig.price))
+        .storeUint(lotteryConfig.refPercent, 16)
+        .storeUint(jpAmount, 128)  // jp_amount
+        .storeUint(0n, 128)        // locked_jp_coins
+        .storeUint(0n, 128)        // tl_ton_amount
+        .storeUint(0n, 64)         // tl_ton_until
+        .storeUint(tlDelayTon, 64) // tl_delay
+        .endCell();
+
+    const jetInit = { code: jetCode, data: jetStateInit };
+    const jet = provider.open(new Jet(contractAddress(0, jetInit), jetInit));
+
+    // Deploy Jet and grant minting rights
+    await deploy();
+    await setLotteryAddress();
     // await scheduleTONWithdrawal(); // schedule withdrawal interactively
     // await executeTONWithdrawal();
     // await scheduleAdminChange();    // Schedule admin change
