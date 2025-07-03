@@ -24,24 +24,33 @@ export type JetConfig = {
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
+    const admin = Address.parse(config.adminAddress);
+
     return beginCell()
         .storeRef(
             beginCell()
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .storeUint(0, 16)
-            .endCell()
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .storeUint(0, 16)
+                .endCell(),
         )
-        .storeUint(0, 64)
+        .storeUint(0, 64) // next_ticket_index
         .storeAddress(config.collectionAddress)
-        .storeAddress(Address.parse(config.adminAddress))
+        .storeAddress(admin)
         .storeCoins(toNano(config.price))
         .storeUint(config.refPercent, 16)
-        .endCell()
+        .storeUint(0, 128) // jackpot_amount
+        .storeUint(0, 128) // locked_jp_coins
+        .storeUint(0, 128) // tl_ton_amount
+        .storeUint(0, 64) // tl_ton_until
+        .storeUint(0, 64) // tl_delay
+        .storeAddress(admin) // new_admin_address
+        .storeUint(0, 64) // tl_admin_until
+        .endCell();
 }
 
 export class Jet implements Contract {
@@ -122,5 +131,32 @@ export class Jet implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body,
         });
+    }
+
+    async getCounters(provider: ContractProvider) {
+        const result = await provider.get('get_counters', []);
+        return {
+            jp: result.stack.readNumber(),
+            x200: result.stack.readNumber(),
+            x77: result.stack.readNumber(),
+            x20: result.stack.readNumber(),
+            x7: result.stack.readNumber(),
+            x3: result.stack.readNumber(),
+            x1: result.stack.readNumber(),
+        };
+    }
+
+    async getFullData(provider: ContractProvider) {
+        const result = await provider.get('get_full_data', []);
+        return {
+            counters: result.stack.readCell(),
+            nextTicketIndex: result.stack.readNumber(),
+            collectionAddress: result.stack.readAddress(),
+            adminAddress: result.stack.readAddress(),
+            price: result.stack.readBigNumber(),
+            refPercent: result.stack.readNumber(),
+            jackpotAmount: result.stack.readBigNumber(),
+            lockedJpCoins: result.stack.readBigNumber(),
+        };
     }
 }
