@@ -65,7 +65,8 @@ export async function run(provider: NetworkProvider) {
     // await setLotteryAddress();
     // await scheduleTONWithdrawal(); // schedule withdrawal interactively
     // await executeTONWithdrawal();
-    // await changeAdminAddress();
+    // await scheduleAdminChange();    // Schedule admin change
+    // await executeAdminChange();     // Execute scheduled admin change
 
     // Deploy the lottery contract
     async function deploy() {
@@ -148,23 +149,6 @@ export async function run(provider: NetworkProvider) {
         } else {
             console.log('Canceled');
         }
-    }
-
-    // Schedule and execute an admin change after the timelock delay
-    async function changeAdminAddress() {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
-
-        const newAdmin = await ask('New admin address for immediate change: ');
-        rl.close();
-
-        const addr = newAdmin ? Address.parse(newAdmin) : null;
-        await jet.sendScheduleAdminChange(provider.sender(), addr, toNano('0.01'));
-        console.log(
-            `Admin change scheduled. Waiting ${tlDelayTon} seconds before execution...`,
-        );
-        await new Promise((resolve) => setTimeout(resolve, Number(tlDelayTon) * 1000));
-        await executeAdminChange();
     }
 
     await provider.waitForDeploy(jet.address);
