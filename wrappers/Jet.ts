@@ -51,6 +51,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeAddress(admin) // new_admin_address
         .storeUint(0, 64) // tl_admin_until
         .endCell();
+    );
 }
 
 export class Jet implements Contract {
