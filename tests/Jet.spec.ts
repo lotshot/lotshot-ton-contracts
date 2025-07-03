@@ -22,4 +22,37 @@ describe('Jet', () => {
     });
 
     it('should deploy', async () => {});
+
+    it.skip('pays out prizes', async () => {
+        const collection = await blockchain.treasury('collection');
+
+        const jpAmount = toNano('10');
+        const tlDelayTon = 3600n;
+
+        expect(() =>
+            beginCell()
+                .storeRef(
+                    beginCell()
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .storeUint(0, 16)
+                        .endCell(),
+                )
+                .storeUint(0, 64)
+                .storeAddress(collection.address)
+                .storeAddress(deployer.address)
+                .storeCoins(toNano('0.25'))
+                .storeUint(0, 16)
+                .storeUint(jpAmount, 128)
+                .storeUint(0n, 128)
+                .storeUint(0n, 128)
+                .storeUint(0n, 64)
+                .storeUint(tlDelayTon, 64)
+                .endCell(),
+        ).toThrow();
+    });
 });
