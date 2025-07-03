@@ -62,6 +62,8 @@ export async function run(provider: NetworkProvider) {
         .storeUint(0n, 128)       // tl_usdt_amount
         .storeUint(0n, 64)        // tl_usdt_until
         .storeUint(tlDelay, 64)   // tl_delay
+        .storeUint(0n, 128)       // tl_ton_amount
+        .storeUint(0n, 64)        // tl_ton_until
         .endCell();
 
     const init = { code, data: stateInit };
@@ -72,7 +74,8 @@ export async function run(provider: NetworkProvider) {
     // await setTokenWallet();
 
 
-    // await withdraw();               // Withdraw TON to admin address
+    // await scheduleTONWithdrawal();   // Schedule TON withdrawal
+    // await executeTONWithdrawal();    // Execute scheduled TON withdrawal
     // await scheduleUSDTWithdrawal(); // Schedule USDT withdrawal
     // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
     // await scheduleAdminChange();    // Schedule admin change
@@ -125,6 +128,23 @@ export async function run(provider: NetworkProvider) {
         }
     }
 
+    async function scheduleTONWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const amountStr = await ask('Amount to schedule (TON): ');
+        console.log(`Schedule withdrawal of ${amountStr} nanoTON`);
+        const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendScheduleTON(provider.sender(), BigInt(amountStr), toNano('0.1'));
+            console.log('✅ Withdrawal scheduled');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
     async function executeUSDTWithdrawal() {
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
@@ -135,6 +155,21 @@ export async function run(provider: NetworkProvider) {
         if (confirm === 'y' || confirm === 'yes') {
             await jet.sendExecuteUSDT(provider.sender(), toNano('0.1'));
             console.log('✅ Scheduled withdrawal executed');
+        } else {
+            console.log('Canceled');
+        }
+    }
+
+    async function executeTONWithdrawal() {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+        const confirm = (await ask('Execute scheduled TON withdrawal? (y/N) ')).toLowerCase();
+        rl.close();
+
+        if (confirm === 'y' || confirm === 'yes') {
+            await jet.sendExecuteTON(provider.sender(), toNano('0.1'));
+            console.log('✅ Scheduled TON withdrawal executed');
         } else {
             console.log('Canceled');
         }
@@ -170,12 +205,6 @@ export async function run(provider: NetworkProvider) {
         } else {
             console.log('Canceled');
         }
-    }
-
-
-    // Withdraws funds from the lottery contract. The balance must exceed 0.05 TON
-    async function withdraw() {
-        await jet.sendWithdraw(provider.sender(), toNano('0.01'));
     }
 
 

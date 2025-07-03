@@ -5,3 +5,5 @@ export const OP_EXEC_USDT = 7;
 export const OP_SCHEDULE_ADMIN = 8;
 export const OP_EXEC_ADMIN = 9;
 export const OP_CANCEL_ADMIN = 10;
+export const OP_SCHEDULE_TON = 11;
+export const OP_EXEC_TON = 12;
