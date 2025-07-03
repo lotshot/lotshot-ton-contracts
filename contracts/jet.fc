@@ -104,7 +104,9 @@ int locked_jp_tokens,
         return();
     }
 
-    if (in_msg_body.slice_empty?()) {
+    ;; some wallets may send a body shorter than 32 bits which would cause
+    ;; an underflow when reading the operation code. Ignore those messages.
+    if (slice_bits(in_msg_body) < 32) {
         return();
     }
 
