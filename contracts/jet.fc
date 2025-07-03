@@ -166,6 +166,7 @@ int locked_jp_tokens,
                 .store_ref(refund_transfer)
                 .end_cell();
             send_raw_message(refund_msg, 1);
+            token_balance = token_balance - excess;
         }
 
         slice player_address = sender_wallet;
@@ -245,7 +246,7 @@ int locked_jp_tokens,
                 ;; automatic payout to ticket sender
                 send_winning(jp_amount, qid, player_address, 0, collection_address, 0, token_wallet_address);
 
-                token_balance    = token_balance - jp_amount;   ;; USDT balance update
+                token_balance = token_balance - (jp_amount * jetton_decimals());
                 locked_jp_tokens = 0;      ;; reserve released
                 jp               = 1;      ;; jackpot claimed
                 next_ticket_index += 1;
@@ -274,7 +275,7 @@ int locked_jp_tokens,
                 major += 1;
                 next_ticket_index += 1;
                 send_winning(MAJOR_PRIZE(), qid, player_address, 1, collection_address, 1, token_wallet_address);
-                token_balance = token_balance - MAJOR_PRIZE();
+                token_balance = token_balance - (MAJOR_PRIZE() * jetton_decimals());
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
                     .store_uint(major, 16)
@@ -296,7 +297,7 @@ int locked_jp_tokens,
                 high += 1;
 
                 send_winning(HIGH_PRIZE(), qid, player_address, 2, collection_address, 2, token_wallet_address);
-                token_balance = token_balance - HIGH_PRIZE();
+                token_balance = token_balance - (HIGH_PRIZE() * jetton_decimals());
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -319,7 +320,7 @@ int locked_jp_tokens,
                 mid += 1;
 
                 send_winning(MID_PRIZE(), qid, player_address, 3, collection_address, 3, token_wallet_address);
-                token_balance = token_balance - MID_PRIZE();
+                token_balance = token_balance - (MID_PRIZE() * jetton_decimals());
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -342,7 +343,7 @@ int locked_jp_tokens,
                 low_mid += 1;
 
                 send_winning(LOW_MID_PRIZE(), qid, player_address, 4, collection_address, 4, token_wallet_address);
-                token_balance = token_balance - LOW_MID_PRIZE();
+                token_balance = token_balance - (LOW_MID_PRIZE() * jetton_decimals());
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -365,7 +366,7 @@ int locked_jp_tokens,
                 low += 1;
 
                 send_winning(LOW_PRIZE(), qid, player_address, 5, collection_address, 5, token_wallet_address);
-                token_balance = token_balance - LOW_PRIZE();
+                token_balance = token_balance - (LOW_PRIZE() * jetton_decimals());
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -388,7 +389,7 @@ int locked_jp_tokens,
                 mini += 1;
 
                 send_winning(MINI_PRIZE(), qid, player_address, 6, collection_address, 6, token_wallet_address);
-                token_balance = token_balance - MINI_PRIZE();
+                token_balance = token_balance - (MINI_PRIZE() * jetton_decimals());
 
                 cell new_ref = begin_cell()
                     .store_uint(jp, 16)
@@ -413,10 +414,10 @@ int locked_jp_tokens,
         return();
         }
         catch (_) {
+            int ramount = 0;
             if (equal_slices(sender_address, token_wallet_address)) {
                 slice rbody = orig_body;
                 int rqid = 0;
-                int ramount = 0;
                 slice rsender = null_addr();
                 try {
                     rbody~load_uint(32);
@@ -427,6 +428,11 @@ int locked_jp_tokens,
                 } catch (_) {
                 }
             }
+            token_balance = token_balance - ramount;
+            store_data(counters_ref, next_ticket_index, collection_address,
+                       admin_address, price, ref_percent,
+                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_balance, tl_usdt_amount, tl_usdt_until, tl_delay);
             return();
         }
     }
