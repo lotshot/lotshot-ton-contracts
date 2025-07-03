@@ -80,9 +80,11 @@ const int OP_EXEC_ADMIN     = 8;
 	slice cs = in_msg_full.begin_parse();
 	int flags = cs~load_uint(4);
 
-	if (flags & 1) {
-		return();
-	}
+        if (flags & 1) {
+                return();
+        }
+
+        accept_message();
 
         slice sender_address = cs~load_msg_addr();
         var (
