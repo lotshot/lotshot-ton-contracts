@@ -1,5 +1,5 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
-import { OP_SCHEDULE_USDT, OP_EXEC_USDT, OP_SCHEDULE_ADMIN, OP_EXEC_ADMIN, OP_CANCEL_ADMIN } from "./opcodes";
+import { OP_SCHEDULE_USDT, OP_EXEC_USDT, OP_SCHEDULE_ADMIN, OP_EXEC_ADMIN, OP_CANCEL_ADMIN, OP_SCHEDULE_TON, OP_EXEC_TON } from "./opcodes";
 
 export type JetConfig = {
     collectionAddress: Address;
@@ -13,6 +13,8 @@ export type JetConfig = {
     tlUsdtAmount?: bigint;
     tlUsdtUntil?: bigint;
     tlDelay?: bigint;
+    tlTonAmount?: bigint;
+    tlTonUntil?: bigint;
     newAdminAddress?: Address;
     tlAdminUntil?: bigint;
 };
@@ -46,6 +48,8 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .storeUint(config.tlUsdtAmount ?? 0n, 128)
             .storeUint(config.tlUsdtUntil ?? 0n, 64)
             .storeUint(config.tlDelay ?? 0n, 64)
+            .storeUint(config.tlTonAmount ?? 0n, 128)
+            .storeUint(config.tlTonUntil ?? 0n, 64)
             .endCell()
     );
 }
@@ -84,14 +88,6 @@ export class Jet implements Contract {
     }
 
 
-    async sendWithdraw(provider: ContractProvider, via: Sender, value: bigint) {
-        const body = beginCell().storeUint(2, 32).storeUint(0, 64).endCell();
-        await provider.internal(via, {
-            value,
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body,
-        });
-    }
 
     async sendScheduleUSDT(provider: ContractProvider, via: Sender, amount: bigint, value: bigint) {
         const body = beginCell()
@@ -109,6 +105,31 @@ export class Jet implements Contract {
     async sendExecuteUSDT(provider: ContractProvider, via: Sender, value: bigint) {
         const body = beginCell()
             .storeUint(OP_EXEC_USDT, 32)
+            .storeUint(0, 64)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendScheduleTON(provider: ContractProvider, via: Sender, amount: bigint, value: bigint) {
+        const body = beginCell()
+            .storeUint(OP_SCHEDULE_TON, 32)
+            .storeUint(0, 64)
+            .storeUint(amount, 64)
+            .endCell();
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendExecuteTON(provider: ContractProvider, via: Sender, value: bigint) {
+        const body = beginCell()
+            .storeUint(OP_EXEC_TON, 32)
             .storeUint(0, 64)
             .endCell();
         await provider.internal(via, {
@@ -185,6 +206,8 @@ export class Jet implements Contract {
             tlUsdtAmount: res.stack.readBigNumber(),
             tlUsdtUntil: res.stack.readBigNumber(),
             tlDelay: res.stack.readBigNumber(),
+            tlTonAmount: res.stack.readBigNumber(),
+            tlTonUntil: res.stack.readBigNumber(),
         };
     }
 }
