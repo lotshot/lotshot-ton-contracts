@@ -217,6 +217,7 @@ int locked_jp_tokens,
                         .end_cell();
 
                     send_raw_message(ref_msg, 1);
+                    token_balance = token_balance - referral_amount;
                 }
         }
 
