@@ -94,12 +94,15 @@ Select `deployJet` and follow the prompts. Ensure you call `deploy()` and `setLo
 - `executeWithdraw()` – transfers the scheduled TON amount to the administrator.
 - `scheduleAdminChange()` – schedules a new administrator address or cancels with `null`.
 - `executeAdminChange()` – finalizes the pending administrator change.
+- `changeAdminAddress()` – schedules and executes an administrator update after the timelock.
 
 Withdrawals require two steps. First schedule the desired amount with `scheduleWithdraw()`.
 After the delay specified by `TIMELOCK_DELAY_SEC_TON` expires, call `executeWithdraw()`
 to transfer the funds.
 Changing the administrator works in the same way: call `scheduleAdminChange()` and
 after the delay execute it with `executeAdminChange()`.
+`changeAdminAddress()` combines these steps by waiting for the timelock before
+calling `executeAdminChange()`.
 
 Function calls are commented out by default. Uncomment the desired call before running `npm run start`.
 

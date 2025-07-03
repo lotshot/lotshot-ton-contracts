@@ -109,6 +109,7 @@ export async function run(provider: NetworkProvider) {
         });
     }
 
+
     // Execute the previously scheduled admin change
     async function executeAdminChange() {
         await provider.sender().send({
@@ -116,6 +117,16 @@ export async function run(provider: NetworkProvider) {
             value: toNano('0.01'),
             body: beginCell().storeUint(8, 32).storeUint(0, 64).endCell(),
         });
+    }
+
+    // Schedule and execute an admin change after the timelock delay
+    async function changeAdminAddress(new_admin: string) {
+        await scheduleAdminChange(new_admin);
+        console.log(
+            `Admin change scheduled. Waiting ${tlDelayTon} seconds before execution...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, Number(tlDelayTon) * 1000));
+        await executeAdminChange();
     }
 
     await provider.waitForDeploy(jet.address);
