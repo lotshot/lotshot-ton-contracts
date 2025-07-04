@@ -108,7 +108,8 @@ export async function run(provider: NetworkProvider) {
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
-            await jet.sendScheduleUSDT(provider.sender(), BigInt(amountStr), toNano('0.1'));
+            const amount = BigInt(amountStr) * 1_000_000n;
+            await jet.sendScheduleUSDT(provider.sender(), amount, toNano('0.1'));
             console.log('✅ Withdrawal scheduled');
         } else {
             console.log('Canceled');
@@ -120,12 +121,13 @@ export async function run(provider: NetworkProvider) {
         const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
         const amountStr = await ask('Amount to schedule (TON): ');
-        console.log(`Schedule withdrawal of ${amountStr} nanoTON`);
+        console.log(`Schedule withdrawal of ${amountStr} TON`);
         const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
-            await jet.sendScheduleTON(provider.sender(), BigInt(amountStr), toNano('0.1'));
+            const amount = toNano(amountStr);
+            await jet.sendScheduleTON(provider.sender(), amount, toNano('0.1'));
             console.log('✅ Withdrawal scheduled');
         } else {
             console.log('Canceled');
