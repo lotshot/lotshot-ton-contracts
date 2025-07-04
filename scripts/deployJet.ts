@@ -18,7 +18,7 @@ export async function run(provider: NetworkProvider) {
         collectionAddress: collection.address, // collection address filled automatically
         adminAddress: process.env.ADMIN_ADDRESS || '', // lottery administrator address
         price: 0.25, // ticket price
-        refPercent: Number(process.env.REF_PERCENT || '0'), // referral fee in basis points
+        refPercent: Number(process.env.REF_PERCENT || '0'), // referral % (0-100)
         jackpotAmount: process.env.JACKPOT_AMOUNT_TON
             ? Number(process.env.JACKPOT_AMOUNT_TON)
             : undefined,

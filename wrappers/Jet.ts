@@ -20,13 +20,13 @@ export type JetConfig = {
     collectionAddress: Address;
     adminAddress: string;
     price: number;
-    refPercent: number;
+    refPercent: number;     // referral % (0-100)
     jackpotAmount?: number; // TON
     timelockDelay?: number; // seconds
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
-    const jackpotAmount = config.jackpotAmount ?? 10_000;
+    const jackpotAmount = config.jackpotAmount ?? 1_000;
     const timelockDelay = config.timelockDelay ?? 86_400;
 
     const counters = beginCell()
