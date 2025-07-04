@@ -30,8 +30,8 @@ export async function run(provider: NetworkProvider) {
     const code = await compile('Jet');
     const network = provider.network();
     const jpUsdt = process.env.JACKPOT_AMOUNT_USDT
-        ? BigInt(process.env.JACKPOT_AMOUNT_USDT) * 10n ** 9n
-        : (network === 'mainnet' ? 10_000n : 100n) * 10n ** 9n;
+        ? BigInt(process.env.JACKPOT_AMOUNT_USDT)
+        : (network === 'mainnet' ? 10_000n : 100n);
 
     // timelock delay (seconds)
     const tlDelay = process.env.TIMELOCK_DELAY_SEC
@@ -108,7 +108,7 @@ export async function run(provider: NetworkProvider) {
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
-            const amount = BigInt(amountStr) * 1_000_000n;
+            const amount = BigInt(amountStr);
             await jet.sendScheduleUSDT(provider.sender(), amount, toNano('0.1'));
             console.log('✅ Withdrawal scheduled');
         } else {
