@@ -41,7 +41,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .storeAddress(Address.parse(config.adminAddress))
             .storeCoins(config.price)
             .storeUint(config.refPercent, 8)
-            .storeAddress(null)
+            .storeRef(beginCell().storeAddress(null).endCell())
             .storeCoins(config.jpAmount ?? 0n)
             .storeCoins(config.lockedJpTokens ?? 0n)
             .storeCoins(config.tokenBalance ?? 0n)
