@@ -37,7 +37,8 @@ export function jetConfigToCell(config: JetConfig): Cell {
             )
             .storeUint(0, 64)
             // collection and token wallet addresses are initially empty to fit 1023-bit limit
-            .storeAddress(null)
+            //.storeAddress(null)
+            .storeAddress(config.collectionAddress)
             .storeAddress(Address.parse(config.adminAddress))
             .storeCoins(config.price)
             .storeUint(config.refPercent, 8)
