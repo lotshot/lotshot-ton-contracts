@@ -33,7 +33,7 @@ export class JettonWallet implements Contract {
             responseAddress?: Address;
         },
     ) {
-        const response = args.responseAddress ?? via.address?.();
+        const response = args.responseAddress ?? via.address;
         if (!response) throw new Error('Sender address required');
         const bodyBuilder = beginCell()
             .storeUint(0xf8a7ea5, 32) // jetton_transfer op
