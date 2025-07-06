@@ -29,6 +29,7 @@ export class JettonWallet implements Contract {
             value: bigint;
             forwardTon?: bigint;
             payload?: Cell;
+            forwardPayload?: Cell;
             queryID?: bigint;
             responseAddress?: Address;
         },
@@ -48,7 +49,8 @@ export class JettonWallet implements Contract {
         }
         const body = bodyBuilder
             .storeCoins(args.forwardTon ?? 0n)
-            .storeBit(0) // empty forward payload
+            .storeBit(args.forwardPayload ? 1 : 0)
+            .storeMaybeRef(args.forwardPayload)
             .endCell();
 
         await provider.internal(via, {
