@@ -1,6 +1,7 @@
 import { toNano, Address } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
-import { Jet } from '../wrappers/Jet';
+import { JettonMaster } from '../wrappers/JettonMaster';
+import { JettonWallet } from '../wrappers/JettonWallet';
 import * as readline from 'readline';
 
 export async function run(provider: NetworkProvider) {
@@ -10,10 +11,29 @@ export async function run(provider: NetworkProvider) {
     });
 
     const jettons = BigInt(amountStr) * 1_000_000n;
-    const jet = provider.open(
-        Jet.createFromAddress(Address.parse(process.env.LOTTERY_ADDRESS || '')),
+
+    const tokenMaster = provider.open(
+        JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS || '')),
+    );
+    const adminAddress = provider.sender().address();
+    if (!adminAddress) throw new Error('Sender address missing');
+
+    const adminWalletAddr = await tokenMaster.getWalletAddress(adminAddress);
+    const lotteryWalletAddr = await tokenMaster.getWalletAddress(
+        Address.parse(process.env.LOTTERY_ADDRESS || ''),
     );
 
-    await jet.sendTopUpUSDT(provider.sender(), jettons, toNano('0.06'));
+    const adminWallet = provider.open(JettonWallet.createFromAddress(adminWalletAddr));
+    const balance = await adminWallet.getBalance();
+    if (balance < jettons) {
+        throw new Error('Insufficient USDT balance');
+    }
+
+    await adminWallet.sendTransfer(provider.sender(), {
+        to: lotteryWalletAddr,
+        amount: jettons,
+        value: toNano('0.31'),
+        forwardTon: toNano('0.3'),
+    });
     console.log(`✅ Topped up ${amountStr} USDT`);
 }
