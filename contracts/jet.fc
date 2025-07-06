@@ -19,6 +19,7 @@ const int OP_EXEC_ADMIN     = 9;
 const int OP_CANCEL_ADMIN   = 10;
 const int OP_SCHEDULE_TON = 11;
 const int OP_EXEC_TON     = 12;
+const int OP_TOPUP_USDT   = 13;
 
 (
     cell, ;; counters
@@ -474,6 +475,7 @@ int locked_jp_tokens,
     }
 
     ;; parse op and query_id for admin operations
+    slice admin_body = in_msg_body;
     in_msg_body~load_uint(32);
     int qid = in_msg_body~load_uint(64);
 
@@ -559,6 +561,49 @@ int locked_jp_tokens,
                    token_wallet_address, jp_amount, locked_jp_tokens,
                    token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return ();
+    }
+
+    if (op == OP_TOPUP_USDT) {
+        slice orig_body = admin_body;
+        throw_unless(401, equal_slices(sender_address, admin_address));
+        throw_unless(400, msg_value >= 30000000);
+        int amount = in_msg_body~load_coins();
+        try {
+            token_balance += amount;
+
+            store_data(counters_ref, next_ticket_index, collection_address,
+                       admin_address, price, ref_percent,
+                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_balance, tl_usdt_amount, tl_usdt_until, tl_delay,
+                       tl_ton_amount, tl_ton_until);
+
+            var nmsg = begin_cell()
+                .store_uint(flag::bounce(), 6)
+                .store_slice(sender_address)
+                .store_coins(0)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .store_uint(op::notify_topup(), 32)
+                .store_uint(qid, 64)
+                .store_uint(amount, 128)
+                .end_cell();
+            send_raw_message(nmsg, 64);
+            return ();
+        } catch (_) {
+            int ramount = 0;
+            if (equal_slices(sender_address, admin_address) & (msg_value >= 30000000)) {
+                slice rb = orig_body;
+                rb~load_uint(32);
+                rb~load_uint(64);
+                ramount = rb~load_coins();
+            }
+            token_balance = token_balance - ramount;
+            store_data(counters_ref, next_ticket_index, collection_address,
+                       admin_address, price, ref_percent,
+                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_balance, tl_usdt_amount, tl_usdt_until, tl_delay,
+                       tl_ton_amount, tl_ton_until);
+            return();
+        }
     }
 
 
