@@ -1,6 +1,8 @@
 import { Address, beginCell, toNano } from '@ton/core';
 import { Jet } from '../wrappers/Jet';
 import { JettonMaster } from '../wrappers/JettonMaster';
+import { JettonWallet } from '../wrappers/JettonWallet';
+import { OP_NOTIFY_TOPUP } from '../wrappers/opcodes';
 import { compile, NetworkProvider } from '@ton/blueprint';
 import { Collection } from '../wrappers/Collection';
 import * as readline from 'readline';
@@ -65,6 +67,7 @@ export async function run(provider: NetworkProvider) {
     // await executeTONWithdrawal();    // Execute scheduled TON withdrawal
     // await scheduleUSDTWithdrawal(); // Schedule USDT withdrawal
     // await executeUSDTWithdrawal();  // Execute scheduled withdrawal
+    // await topUpUSDT();            // Top up lottery USDT balance
     // await scheduleAdminChange();    // Schedule admin change
     // await executeAdminChange();     // Execute scheduled admin change
 
@@ -147,6 +150,37 @@ export async function run(provider: NetworkProvider) {
         } else {
             console.log('Canceled');
         }
+    }
+
+    async function topUpUSDT() {
+        const amountStr = await new Promise<string>(res => {
+            const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+            rl.question('Amount to top-up (whole USDT): ', ans => { rl.close(); res(ans); });
+        });
+
+        const jettons = BigInt(amountStr) * 1_000_000n;
+
+        const adminAddress = provider.sender().address();
+        if (!adminAddress) throw new Error('Sender address missing');
+
+        const adminWalletAddr = await jettonMaster.getWalletAddress(adminAddress);
+        const lotteryWalletAddr = await jettonMaster.getWalletAddress(jet.address);
+
+        const adminWallet = provider.open(JettonWallet.createFromAddress(adminWalletAddr));
+        const balance = await adminWallet.getBalance();
+        if (balance < jettons) {
+            throw new Error('Insufficient USDT balance');
+        }
+
+        const payload = beginCell().storeUint(OP_NOTIFY_TOPUP, 32).endCell();
+        await adminWallet.sendTransfer(provider.sender(), {
+            to: lotteryWalletAddr,
+            amount: jettons,
+            value: toNano('0.31'),
+            forwardTon: toNano('0.3'),
+            payload,
+        });
+        console.log(`✅ Topped up ${amountStr} USDT`);
     }
 
     async function executeTONWithdrawal() {
