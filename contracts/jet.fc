@@ -171,12 +171,32 @@ int locked_jp_tokens,
 
             throw_unless(400, msg_value >= min_ticket_value());
 
-            throw_unless(400, amount >= price);
             token_balance += amount;
             ;; jp_amount is stored in whole tokens, convert to microtokens
             if (locked_jp_tokens == 0) {
                 locked_jp_tokens = jp_amount * jetton_decimals();
             }
+
+            ;; check for admin top-up payload
+            int topup = 0;
+            if (slice_bits(fwd_payload) >= 32) {
+                int op_top = fwd_payload.preload_uint(32);
+                if (op_top == op::notify_topup()) {
+                    fwd_payload~load_uint(32);
+                    end_parse(fwd_payload);
+                    topup = 1;
+                }
+            }
+
+            if (topup == 1) {
+                store_data(counters_ref, next_ticket_index, collection_address,
+                           admin_address, price, ref_percent,
+                           token_wallet_address, jp_amount, locked_jp_tokens,
+                           token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                return();
+            }
+
+            throw_unless(400, amount >= price);
 
         int excess = amount - price;
         if (excess > 0) {

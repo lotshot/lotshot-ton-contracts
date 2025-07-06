@@ -8,3 +8,4 @@ export const OP_CANCEL_ADMIN = 10;
 export const OP_SCHEDULE_TON = 11;
 export const OP_EXEC_TON = 12;
 export const OP_TOPUP_USDT = 13;
+export const OP_NOTIFY_TOPUP = 0x7000;
