@@ -173,10 +173,12 @@ export async function run(provider: NetworkProvider) {
         }
 
         const payload = beginCell().storeUint(OP_NOTIFY_TOPUP, 32).endCell();
+        // 0.31 TON is not enough if the lottery wallet is undeployed.
+        // Increase the message value to cover state init and gas fees.
         await adminWallet.sendTransfer(provider.sender(), {
             to: lotteryWalletAddr,
             amount: jettons,
-            value: toNano('0.31'),
+            value: toNano('0.55'),
             forwardTon: toNano('0.3'),
             payload,
         });
