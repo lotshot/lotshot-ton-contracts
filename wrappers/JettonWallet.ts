@@ -28,19 +28,25 @@ export class JettonWallet implements Contract {
             amount: bigint;
             value: bigint;
             forwardTon?: bigint;
+            payload?: Cell;
             queryID?: bigint;
             responseAddress?: Address;
         },
     ) {
         const response = args.responseAddress ?? via.address?.();
         if (!response) throw new Error('Sender address required');
-        const body = beginCell()
+        const bodyBuilder = beginCell()
             .storeUint(0xf8a7ea5, 32) // jetton_transfer op
             .storeUint(args.queryID ?? 0n, 64)
             .storeCoins(args.amount)
             .storeAddress(args.to)
             .storeAddress(response)
-            .storeBit(0) // no custom payload
+        if (args.payload) {
+            bodyBuilder.storeBit(1).storeRef(args.payload);
+        } else {
+            bodyBuilder.storeBit(0);
+        }
+        const body = bodyBuilder
             .storeCoins(args.forwardTon ?? 0n)
             .storeBit(0) // empty forward payload
             .endCell();

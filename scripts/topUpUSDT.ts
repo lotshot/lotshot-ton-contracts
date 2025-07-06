@@ -2,6 +2,8 @@ import { toNano, Address } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
 import { JettonMaster } from '../wrappers/JettonMaster';
 import { JettonWallet } from '../wrappers/JettonWallet';
+import { beginCell } from '@ton/core';
+import { OP_NOTIFY_TOPUP } from '../wrappers/opcodes';
 import * as readline from 'readline';
 
 export async function run(provider: NetworkProvider) {
@@ -29,11 +31,14 @@ export async function run(provider: NetworkProvider) {
         throw new Error('Insufficient USDT balance');
     }
 
+    // mark transfer as a top-up so the lottery keeps full amount
+    const payload = beginCell().storeUint(OP_NOTIFY_TOPUP, 32).endCell();
     await adminWallet.sendTransfer(provider.sender(), {
         to: lotteryWalletAddr,
         amount: jettons,
         value: toNano('0.31'),
         forwardTon: toNano('0.3'),
+        payload,
     });
     console.log(`✅ Topped up ${amountStr} USDT`);
 }
