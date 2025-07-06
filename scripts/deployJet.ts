@@ -160,7 +160,7 @@ export async function run(provider: NetworkProvider) {
 
         const jettons = BigInt(amountStr) * 1_000_000n;
 
-        const adminAddress = provider.sender().address();
+        const adminAddress = provider.sender().address;
         if (!adminAddress) throw new Error('Sender address missing');
 
         const adminWalletAddr = await jettonMaster.getWalletAddress(adminAddress);
