@@ -164,7 +164,9 @@ export async function run(provider: NetworkProvider) {
         if (!adminAddress) throw new Error('Sender address missing');
 
         const adminWalletAddr = await jettonMaster.getWalletAddress(adminAddress);
-        const lotteryWalletAddr = await jettonMaster.getWalletAddress(jet.address);
+        // Send jetton transfer directly to the lottery contract.
+        // The Jetton wallet will forward a notification with `notify_topup`.
+        const lotteryWalletAddr = jet.address;
 
         const adminWallet = provider.open(JettonWallet.createFromAddress(adminWalletAddr));
         const balance = await adminWallet.getBalance();
