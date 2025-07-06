@@ -180,7 +180,7 @@ export async function run(provider: NetworkProvider) {
             amount: jettons,
             value: toNano('0.55'),
             forwardTon: toNano('0.3'),
-            payload,
+            forwardPayload: payload,
         });
         console.log(`✅ Topped up ${amountStr} USDT`);
     }
