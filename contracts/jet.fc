@@ -161,6 +161,9 @@ int locked_jp_tokens,
             int amount = in_msg_body~load_coins();
             slice sender_wallet = in_msg_body~load_msg_addr();
 
+            slice response_destination = in_msg_body~load_msg_addr(); ;; NEW
+            int   forward_ton_amount   = in_msg_body~load_coins();    ;; NEW
+
             int is_cell = in_msg_body~load_uint(1);
             slice fwd_payload = begin_cell().end_cell().begin_parse();
             if (is_cell == 0) {
@@ -480,6 +483,8 @@ int locked_jp_tokens,
                     rqid = rbody~load_uint(64);
                     ramount = rbody~load_coins();
                     rsender = rbody~load_msg_addr();
+                    rbody~load_msg_addr();   ;; skip response_destination
+                    rbody~load_coins();      ;; skip forward_ton_amount
                     refund_tokens(ramount, rqid, rsender, token_wallet_address);
                 } catch (_) {
                 }
