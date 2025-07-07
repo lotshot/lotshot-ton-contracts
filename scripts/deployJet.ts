@@ -169,6 +169,10 @@ export async function run(provider: NetworkProvider) {
         // `notify_topup` to the lottery contract.
         const lotteryWalletAddr = await jettonMaster.getWalletAddress(jet.address);
 
+        // Deploy the lottery jetton wallet in case it is not created yet
+        await jettonMaster.sendDeployWallet(provider.sender(), jet.address, toNano('0.2'));
+        await provider.waitForDeploy(lotteryWalletAddr);
+
         const adminWallet = provider.open(JettonWallet.createFromAddress(adminWalletAddr));
         const balance = await adminWallet.getBalance();
         if (balance < jettons) {
