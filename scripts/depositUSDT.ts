@@ -1,40 +1,58 @@
+// deposit-usdt.ts
 import { Address, beginCell, toNano } from '@ton/core';
-import { Jet } from '../wrappers/Jet';
-import { JettonMaster } from '../wrappers/JettonMaster';
-import { NetworkProvider } from '@ton/blueprint';
-import { OP_ADMIN_DEPOSIT } from '../wrappers/opcodes';
+import { NetworkProvider }            from '@ton/blueprint';
+import { Jet }                        from '../wrappers/Jet';
+import { JettonMaster }               from '../wrappers/JettonMaster';
+import { OP_ADMIN_DEPOSIT }           from '../wrappers/opcodes';
+import readline                       from 'readline';
 
 export async function run(provider: NetworkProvider) {
-    const jetAddress = Address.parse(process.env.LOTTERY_ADDRESS || '');
-    const tokenAddress = Address.parse(process.env.TOKEN_ADDRESS || '');
-    const adminAddress = Address.parse(process.env.ADMIN_ADDRESS || '');
+    /* ── contracts & addresses ───────────────────────────────────────── */
+    const jet       = provider.open(
+        Jet.createFromAddress(Address.parse(process.env.LOTTERY_ADDRESS!))
+    );
+    const master    = provider.open(
+        JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS!))
+    );
+    const adminEOA  = Address.parse(process.env.ADMIN_ADDRESS!);
 
-    const jet = provider.open(Jet.createFromAddress(jetAddress));
-    const master = provider.open(JettonMaster.createFromAddress(tokenAddress));
+    const adminWallet = await master.getWalletAddress(adminEOA);   // admin jetton-wallet
+    const jetWallet   = await master.getWalletAddress(jet.address); // game jetton-wallet (only for info)
+    const jetAddr     = jet.address;                                // Jet contract itself
 
-    const adminWallet = await master.getWalletAddress(adminAddress);
-    const lotteryWallet = await master.getWalletAddress(jet.address);
+    /* ── ask for amount ─────────────────────────────────────────────── */
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const amountStr = await new Promise<string>(resolve =>
+        rl.question('Deposit amount (USDT): ', a => { rl.close(); resolve(a.trim()); })
+    );
+    if (!amountStr) return;
 
-    const amountTokens = BigInt(process.env.DEPOSIT_USDT || '0');
-    const payload = beginCell().storeUint(OP_ADMIN_DEPOSIT, 32).endCell();
+    const micro = BigInt(amountStr) * 1_000_000n;   // 6-decimals → micro-USDT
 
-    const body = beginCell()
-        .storeUint(0x0f8a7ea5, 32) // jetton transfer
-        .storeUint(0, 64)
-        .storeCoins(amountTokens * 1000000n)
-        .storeAddress(lotteryWallet)
-        .storeAddress(adminAddress)
-        .storeUint(0, 1)
-        .storeCoins(toNano('0.27'))
-        .storeUint(1, 1)
-        .storeRef(payload)
+    /* ── forward_payload with OP_ADMIN_DEPOSIT (0x4445_504F, "DEPO") ── */
+    const fwdPayload = beginCell()
+        .storeUint(OP_ADMIN_DEPOSIT, 32)
         .endCell();
 
+    /* ── build jetton_transfer body ──────────────────────────────────── */
+    const body = beginCell()
+        .storeUint(0x0f8a7ea5, 32)     // op::jetton_transfer (TEP-74)
+        .storeUint(0, 64)              // query_id
+        .storeCoins(micro)             // amount (µUSDT)
+        .storeAddress(jetAddr)         // **dest = Jet contract (NOT its wallet)**
+        .storeAddress(adminEOA)        // response_destination (any address)
+        .storeUint(0, 1)               // no custom_payload
+        .storeCoins(toNano('0.27'))    // forward TON for Jet contract gas
+        .storeUint(1, 1)               // forward_payload is stored in **ref**
+        .storeRef(fwdPayload)          // ref with 32-bit 'DEPO'
+        .endCell();
+
+    /* ── send from the admin’s wallet ───────────────────────────────── */
     await provider.sender().send({
-        to: adminWallet,
-        value: toNano('0.5'),
+        to:    adminWallet,            // admin jetton-wallet
+        value: toNano('0.5'),          // enough TON for both tx and forwarding
         body,
     });
 
-    console.log('✅ Deposit sent');
+    console.log(`✅ deposited ${amountStr} USDT`);
 }
