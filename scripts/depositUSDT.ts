@@ -1,16 +1,48 @@
 // deposit-usdt.ts
 import { Address, beginCell, toNano } from '@ton/core';
-import { NetworkProvider }            from '@ton/blueprint';
+import { compile, NetworkProvider }   from '@ton/blueprint';
+import { Collection }                 from '../wrappers/Collection';
 import { Jet }                        from '../wrappers/Jet';
 import { JettonMaster }               from '../wrappers/JettonMaster';
 import { OP_ADMIN_DEPOSIT }           from '../wrappers/opcodes';
 import readline                       from 'readline';
+import { collectionConfig }           from './deployJet';
 
 export async function run(provider: NetworkProvider) {
     /* ── contracts & addresses ───────────────────────────────────────── */
-    const jet       = provider.open(
-        Jet.createFromAddress(Address.parse(process.env.LOTTERY_ADDRESS!))
+    const collection = provider.open(
+        Collection.createFromConfig(collectionConfig, await compile('Collection')),
     );
+
+    const network = provider.network();
+    const jpUsdt = process.env.JACKPOT_AMOUNT_USDT
+        ? BigInt(process.env.JACKPOT_AMOUNT_USDT)
+        : (network === 'mainnet' ? 10_000n : 100n);
+
+    const tlDelay = process.env.TIMELOCK_DELAY_SEC
+        ? BigInt(process.env.TIMELOCK_DELAY_SEC)
+        : (network === 'mainnet' ? 172800n : 3600n);
+
+    const jetConfig = {
+        collectionAddress: collection.address,
+        adminAddress: process.env.ADMIN_ADDRESS || '',
+        price: BigInt(process.env.TICKET_PRICE || '10000000'),
+        refPercent: Number(process.env.REF_PERCENT || '0'),
+        tokenAddress: Address.parse(process.env.TOKEN_ADDRESS || ''),
+        jpAmount: jpUsdt,
+        lockedJpTokens: 0n,
+        tokenBalance: 0n,
+        tlUsdtAmount: 0n,
+        tlUsdtUntil: 0n,
+        tlDelay,
+        tlTonAmount: 0n,
+        tlTonUntil: 0n,
+    };
+
+    const jet = provider.open(
+        Jet.createFromConfig(jetConfig, await compile('Jet')),
+    );
+
     const master    = provider.open(
         JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS!))
     );
@@ -22,10 +54,17 @@ export async function run(provider: NetworkProvider) {
 
     /* ── ask for amount ─────────────────────────────────────────────── */
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    const amountStr = await new Promise<string>(resolve =>
-        rl.question('Deposit amount (USDT): ', a => { rl.close(); resolve(a.trim()); })
-    );
-    if (!amountStr) return;
+    const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
+
+    const jetLink = `https://tonviewer.com/${jetAddr.toString()}`;
+    const amountStr = await ask(`Deposit amount (USDT) for ${jetLink}: `);
+    console.log(`Deposit ${amountStr} USDT to ${jetLink}`);
+    const confirm = (await ask('Confirm deposit? (y/N) ')).toLowerCase();
+    rl.close();
+    if (confirm !== 'y' && confirm !== 'yes') {
+        console.log('Canceled');
+        return;
+    }
 
     const micro = BigInt(amountStr) * 1_000_000n;   // 6-decimals → micro-USDT
 
