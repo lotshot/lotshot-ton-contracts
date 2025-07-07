@@ -19,6 +19,7 @@ const int OP_EXEC_ADMIN     = 9;
 const int OP_CANCEL_ADMIN   = 10;
 const int OP_SCHEDULE_TON = 11;
 const int OP_EXEC_TON     = 12;
+const int OP_ADMIN_DEPOSIT = 13;
 
 (
     cell, ;; counters
@@ -169,14 +170,32 @@ int locked_jp_tokens,
                 fwd_payload = in_msg_body~load_ref().begin_parse();
             }
 
+            int deposit = 0;
+            if (slice_bits(fwd_payload) == 32) {
+                if (fwd_payload.preload_uint(32) == op::admin_deposit()) {
+                    deposit = 1;
+                }
+            }
+
             throw_unless(400, msg_value >= min_ticket_value());
 
-            throw_unless(400, amount >= price);
+            if (deposit == 0) {
+                throw_unless(400, amount >= price);
+            }
             token_balance += amount;
             ;; jp_amount is stored in whole tokens, convert to microtokens
             if (locked_jp_tokens == 0) {
                 locked_jp_tokens = jp_amount * jetton_decimals();
             }
+
+        if (deposit == 1) {
+                store_data(counters_ref, next_ticket_index, collection_address,
+                           admin_address, price, ref_percent,
+                           token_wallet_address, jp_amount, locked_jp_tokens,
+                           token_balance, tl_usdt_amount, tl_usdt_until, tl_delay,
+                           tl_ton_amount, tl_ton_until);
+                return();
+        }
 
         int excess = amount - price;
         if (excess > 0) {
