@@ -17,6 +17,7 @@ and new tickets remain fully valid for those rewards.
    - `COLLECTION_OWNER` – address that owns the NFT collection.
    - `ADMIN_ADDRESS` – wallet that manages the lottery.
    - `TOKEN_ADDRESS` – jetton used to pay for lottery tickets.
+   - `JET_ADDRESS` – address of the deployed Jet contract for admin deposits.
    - `TICKET_PRICE` – price of one ticket denominated in the jetton.
    - `REF_PERCENT` – referral payout in basis points.
    - `JACKPOT_AMOUNT_USDT` – jackpot size (whole USDT) for the USDT lottery
@@ -29,6 +30,8 @@ and new tickets remain fully valid for those rewards.
 2. Run `npm run start` and choose `deployCollection` to deploy the NFT collection contract.
 3. Adjust `lotteryConfig` in `scripts/deployJet.ts` and select `deployJet` to deploy the lottery contract.
 4. From the same script run `setLotteryAddress()` so the lottery contract can mint NFTs.
+
+The repository also provides `depositUSDT` to deposit liquidity from the admin account. Deposited USDT is locked until the jackpot lock amount has been funded.
 
 The `deployJet.ts` script also exposes `withdraw()` and two helper functions,
 `scheduleUSDTWithdrawal()` and `executeUSDTWithdrawal()`, to manage USDT

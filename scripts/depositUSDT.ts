@@ -14,34 +14,8 @@ export async function run(provider: NetworkProvider) {
         Collection.createFromConfig(collectionConfig, await compile('Collection')),
     );
 
-    const network = provider.network();
-    const jpUsdt = process.env.JACKPOT_AMOUNT_USDT
-        ? BigInt(process.env.JACKPOT_AMOUNT_USDT)
-        : (network === 'mainnet' ? 10_000n : 100n);
-
-    const tlDelay = process.env.TIMELOCK_DELAY_SEC
-        ? BigInt(process.env.TIMELOCK_DELAY_SEC)
-        : (network === 'mainnet' ? 172800n : 3600n);
-
-    const jetConfig = {
-        collectionAddress: collection.address,
-        adminAddress: process.env.ADMIN_ADDRESS || '',
-        price: BigInt(process.env.TICKET_PRICE || '10000000'),
-        refPercent: Number(process.env.REF_PERCENT || '0'),
-        tokenAddress: Address.parse(process.env.TOKEN_ADDRESS || ''),
-        jpAmount: jpUsdt,
-        lockedJpTokens: 0n,
-        tokenBalance: 0n,
-        tlUsdtAmount: 0n,
-        tlUsdtUntil: 0n,
-        tlDelay,
-        tlTonAmount: 0n,
-        tlTonUntil: 0n,
-    };
-
-    const jet = provider.open(
-        Jet.createFromConfig(jetConfig, await compile('Jet')),
-    );
+    const jetAddr = Address.parse(process.env.JET_ADDRESS || '');
+    const jet = provider.open(Jet.createFromAddress(jetAddr));
 
     const master    = provider.open(
         JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS!))
@@ -50,7 +24,6 @@ export async function run(provider: NetworkProvider) {
 
     const adminWallet = await master.getWalletAddress(adminEOA);   // admin jetton-wallet
     const jetWallet   = await master.getWalletAddress(jet.address); // game jetton-wallet (only for info)
-    const jetAddr     = jet.address;                                // Jet contract itself
 
     /* ── ask for amount ─────────────────────────────────────────────── */
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
