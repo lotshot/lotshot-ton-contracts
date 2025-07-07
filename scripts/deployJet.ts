@@ -175,7 +175,10 @@ export async function run(provider: NetworkProvider) {
             throw new Error('Insufficient USDT balance');
         }
 
-        const payload = beginCell().storeUint(OP_NOTIFY_TOPUP, 32).endCell();
+        const payload = beginCell()
+            .storeUint(OP_NOTIFY_TOPUP, 32)
+            .storeUint(0, 32) // placeholder for query id
+            .endCell();
         // 0.31 TON is not enough if the lottery wallet is undeployed.
         // Increase the message value to cover state init and gas fees.
         await adminWallet.sendTransfer(provider.sender(), {
