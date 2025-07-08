@@ -1,22 +1,16 @@
 // deposit-usdt.ts
 import { Address, beginCell, toNano } from '@ton/core';
-import { compile, NetworkProvider }   from '@ton/blueprint';
-import { Collection }                 from '../wrappers/Collection';
+import { NetworkProvider }            from '@ton/blueprint';
 import { Jet }                        from '../wrappers/Jet';
 import { JettonMaster }               from '../wrappers/JettonMaster';
 import { OP_ADMIN_DEPOSIT }           from '../wrappers/opcodes';
 import readline                       from 'readline';
-import { collectionConfig }           from './deployJet';
 
 export async function run(provider: NetworkProvider) {
     /* ── contracts & addresses ───────────────────────────────────────── */
-    const collection = provider.open(
-        Collection.createFromConfig(collectionConfig, await compile('Collection')),
+    const jet       = provider.open(
+        Jet.createFromAddress(Address.parse(process.env.LOTTERY_ADDRESS!))
     );
-
-    const jetAddr = Address.parse(process.env.JET_ADDRESS || '');
-    const jet = provider.open(Jet.createFromAddress(jetAddr));
-
     const master    = provider.open(
         JettonMaster.createFromAddress(Address.parse(process.env.TOKEN_ADDRESS!))
     );
@@ -24,12 +18,17 @@ export async function run(provider: NetworkProvider) {
 
     const adminWallet = await master.getWalletAddress(adminEOA);   // admin jetton-wallet
     const jetWallet   = await master.getWalletAddress(jet.address); // game jetton-wallet (only for info)
+    const jetAddr     = jet.address;                                // Jet contract itself
 
     /* ── ask for amount ─────────────────────────────────────────────── */
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
-    const jetLink = `https://tonviewer.com/${jetAddr.toString()}`;
+    //const jetLink = `https://tonviewer.com/${jet.address.toString()}`;
+    const jetLink = `https://testnet.tonviewer.com/${jet.address.toString({
+        bounceable: true,
+        testOnly:   true,       // adds “-test-only” flag so TonViewer opens the test-net page
+    })}`;
     const amountStr = await ask(`Deposit amount (USDT) for ${jetLink}: `);
     console.log(`Deposit ${amountStr} USDT to ${jetLink}`);
     const confirm = (await ask('Confirm deposit? (y/N) ')).toLowerCase();
