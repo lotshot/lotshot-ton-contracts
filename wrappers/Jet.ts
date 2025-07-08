@@ -20,6 +20,18 @@ export type JetConfig = {
 };
 
 export function jetConfigToCell(config: JetConfig): Cell {
+    const walletRef = beginCell().storeAddress(config.tokenAddress).endCell();
+    const extraRef = beginCell()
+        .storeCoins(config.jpAmount ?? 0n)
+        .storeCoins(config.lockedJpTokens ?? 0n)
+        .storeCoins(config.tokenBalance ?? 0n)
+        .storeCoins(config.tlUsdtAmount ?? 0n)
+        .storeUint(config.tlUsdtUntil ?? 0n, 64)
+        .storeUint(config.tlDelay ?? 0n, 64)
+        .storeCoins(config.tlTonAmount ?? 0n)
+        .storeUint(config.tlTonUntil ?? 0n, 64)
+        .endCell();
+
     return (
         beginCell()
             .storeRef(
@@ -36,20 +48,12 @@ export function jetConfigToCell(config: JetConfig): Cell {
                     .endCell(),
             )
             .storeUint(0, 64)
-            // collection and token wallet addresses are initially empty to fit 1023-bit limit
             .storeAddress(config.collectionAddress)
             .storeAddress(Address.parse(config.adminAddress))
             .storeCoins(config.price)
             .storeUint(config.refPercent, 8)
-            .storeRef(beginCell().storeAddress(null).endCell())
-            .storeCoins(config.jpAmount ?? 0n)
-            .storeCoins(config.lockedJpTokens ?? 0n)
-            .storeCoins(config.tokenBalance ?? 0n)
-            .storeCoins(config.tlUsdtAmount ?? 0n)
-            .storeUint(config.tlUsdtUntil ?? 0n, 64)
-            .storeUint(config.tlDelay ?? 0n, 64)
-            .storeCoins(config.tlTonAmount ?? 0n)
-            .storeUint(config.tlTonUntil ?? 0n, 64)
+            .storeRef(walletRef)
+            .storeRef(extraRef)
             .endCell()
     );
 }
