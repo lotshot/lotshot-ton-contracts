@@ -7,7 +7,7 @@ describe('jet.fc – admin timelock', () => {
     const newAdmin = await jet.blockchain.treasury('new-admin');
 
     const r1 = await jet.contract.sendScheduleAdminChange(jet.deployer.getSender(), newAdmin.address, 1n);
-    const r2 = await jet.contract.sendExecuteAdminChange(jet.deployer.getSender(), 1n);
+    const r2 = await jet.contract.sendExecuteAdminChange(newAdmin.getSender(), 1n);
     expect(r1.transactions).toHaveTransaction({ exitCode: 0 });
     expect(r2.transactions).toHaveTransaction({ exitCode: 0 });
 
