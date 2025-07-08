@@ -183,7 +183,8 @@ const int OP_EXEC_ADMIN     = 8;
                 }
 
                 if (op == OP_EXEC_ADMIN) {
-                        throw_unless(401, equal_slices(sender_address, admin_address));
+                        ;; only the pending admin can confirm the transfer
+                        throw_unless(401, equal_slices(sender_address, new_admin_address));
                         throw_unless(403, now() >= tl_admin_until);
 
                         admin_address = new_admin_address;
