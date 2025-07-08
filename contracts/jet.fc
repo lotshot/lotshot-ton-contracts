@@ -437,23 +437,3 @@ const int OP_EXEC_ADMIN     = 8;
         );
 }
 
-() on_bounced(cell msg) impure {
-        var (
-                cell counters_ref,
-                int next_ticket_index,
-                slice collection_address,
-                slice admin_address,
-                int price,
-                int ref_percent,
-                int jackpot_amount,
-                int locked_jp_coins,
-                int tl_ton_amount,
-                int tl_ton_until,
-                int tl_delay,
-                slice new_admin_address,
-                int tl_admin_until
-        ) = load_data();
-        ;; If the Jackpot transfer bounced, restore the reserve
-        locked_jp_coins = jackpot_amount;  ;; restore reserve after bounced jackpot
-        store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
-}
