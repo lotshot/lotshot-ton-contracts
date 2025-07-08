@@ -32,21 +32,25 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeUint(config.tlTonUntil ?? 0n, 64)
         .endCell();
 
+    const countersRef = beginCell()
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .storeUint(0, 16)
+        .endCell();
+
+    const adminRef = beginCell()
+        .storeAddress(config.newAdminAddress ?? null)
+        .storeUint(config.tlAdminUntil ?? 0n, 64)
+        .endCell();
+
     return (
         beginCell()
-            .storeRef(
-                beginCell()
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeUint(0, 16)
-                    .storeAddress(config.newAdminAddress ?? null)
-                    .storeUint(config.tlAdminUntil ?? 0n, 64)
-                    .endCell(),
-            )
+            .storeRef(countersRef)
+            .storeRef(adminRef)
             .storeUint(0, 64)
             .storeAddress(config.collectionAddress)
             .storeAddress(Address.parse(config.adminAddress))
@@ -198,6 +202,7 @@ export class Jet implements Contract {
         const res = await provider.get('get_full_data', []);
         return {
             counters: res.stack.readCell(),
+            adminPending: res.stack.readCell(),
             nextIndex: res.stack.readBigNumber(),
             collection: res.stack.readAddressOpt(),
             admin: res.stack.readAddress(),
