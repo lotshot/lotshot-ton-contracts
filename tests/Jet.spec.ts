@@ -42,6 +42,15 @@ describe('Jet', () => {
                         .storeUint(0, 16)
                         .endCell(),
                 )
+                .storeRef(
+                    beginCell()
+                        .storeCoins(0)
+                        .storeUint(0, 64)
+                        .storeUint(tlDelayTon, 64)
+                        .storeAddress(null)
+                        .storeUint(0, 64)
+                        .endCell(),
+                )
                 .storeUint(0, 64)
                 .storeAddress(collection.address)
                 .storeAddress(deployer.address)
@@ -49,10 +58,7 @@ describe('Jet', () => {
                 .storeUint(0, 16)
                 .storeUint(jpAmount, 128)
                 .storeUint(0n, 128)
-                .storeUint(0n, 128)
-                .storeUint(0n, 64)
-                .storeUint(tlDelayTon, 64)
                 .endCell(),
-        ).toThrow();
+        ).not.toThrow();
     });
 });
