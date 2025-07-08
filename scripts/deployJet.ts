@@ -73,13 +73,13 @@ export async function run(provider: NetworkProvider) {
         const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
         const ask = (q: string) => new Promise<string>(res => rl.question(q, res));
 
-        const amount = await ask('Amount to schedule (nanoTON, 0 to cancel): ');
-        console.log(`Schedule withdrawal of ${amount} nanoTON`);
+        const amount = await ask('Amount to schedule (TON, 0 to cancel): ');
+        console.log(`Schedule withdrawal of ${amount} TON`);
         const confirm = (await ask('Confirm schedule? (y/N) ')).toLowerCase();
         rl.close();
 
         if (confirm === 'y' || confirm === 'yes') {
-            await jet.sendScheduleTON(provider.sender(), BigInt(amount), toNano('0.01'));
+            await jet.sendScheduleTON(provider.sender(), toNano(amount), toNano('0.01'));
             console.log('✅ Withdrawal scheduled');
         } else {
             console.log('Canceled');
