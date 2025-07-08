@@ -487,7 +487,7 @@ int locked_jp_tokens,
                     rqid = rbody~load_uint(64);
                     ramount = rbody~load_coins();
                     rsender = rbody~load_msg_addr();
-                    refund_tokens(ramount, rqid, rsender, token_wallet_address);
+                    refund_tokens(ramount / jetton_decimals(), rqid, rsender, token_wallet_address);
                 } catch (_) {
                 }
             }
