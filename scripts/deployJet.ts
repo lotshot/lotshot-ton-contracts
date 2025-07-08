@@ -43,12 +43,12 @@ export async function run(provider: NetworkProvider) {
         ),
     );
 
-    // await deploy();
-    // await setLotteryAddress();
-
     // Deploy Jet and grant minting rights
     // await deploy();
     // await setLotteryAddress();
+
+
+
     // await scheduleTONWithdrawal(); // schedule withdrawal interactively
     // await executeTONWithdrawal();
     // await scheduleAdminChange();    // Schedule admin change
