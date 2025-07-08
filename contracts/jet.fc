@@ -46,14 +46,16 @@ const int OP_EXEC_TON     = 12;
     int ref_percent = ds~load_uint(8);
     slice wallet_ref = ds~load_ref().begin_parse();
     slice token_wallet_address = wallet_ref~load_msg_addr();
-    int jp_amount = ds~load_coins();
-    int locked_jp_tokens = ds~load_coins();
-    int token_balance = ds~load_coins();
-    int tl_usdt_amount = ds~load_coins();
-    int tl_usdt_until = ds~load_uint(64);
-    int tl_delay = ds~load_uint(64);
-    int tl_ton_amount = ds~load_coins();
-    int tl_ton_until = ds~load_uint(64);
+
+    slice extra_ref = ds~load_ref().begin_parse();
+    int jp_amount = extra_ref~load_coins();
+    int locked_jp_tokens = extra_ref~load_coins();
+    int token_balance = extra_ref~load_coins();
+    int tl_usdt_amount = extra_ref~load_coins();
+    int tl_usdt_until = extra_ref~load_uint(64);
+    int tl_delay = extra_ref~load_uint(64);
+    int tl_ton_amount = extra_ref~load_coins();
+    int tl_ton_until = extra_ref~load_uint(64);
     return (
         counters_ref,
         next_ticket_index,
@@ -90,6 +92,17 @@ int locked_jp_tokens,
     int tl_ton_amount,
     int tl_ton_until
 ) impure inline {
+    cell extra = begin_cell()
+        .store_coins(jp_amount)
+        .store_coins(locked_jp_tokens)
+        .store_coins(token_balance)
+        .store_coins(tl_usdt_amount)
+        .store_uint(tl_usdt_until, 64)
+        .store_uint(tl_delay, 64)
+        .store_coins(tl_ton_amount)
+        .store_uint(tl_ton_until, 64)
+        .end_cell();
+
     set_data(
         begin_cell()
             .store_ref(counters_ref)
@@ -103,14 +116,7 @@ int locked_jp_tokens,
                     .store_slice(token_wallet_address)
                     .end_cell()
             )
-            .store_coins(jp_amount)
-            .store_coins(locked_jp_tokens)
-            .store_coins(token_balance)
-            .store_coins(tl_usdt_amount)
-            .store_uint(tl_usdt_until, 64)
-            .store_uint(tl_delay, 64)
-            .store_coins(tl_ton_amount)
-            .store_uint(tl_ton_until, 64)
+            .store_ref(extra)
             .end_cell()
     );
 }
