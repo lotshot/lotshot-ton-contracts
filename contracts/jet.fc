@@ -485,7 +485,6 @@ int locked_jp_tokens,
                 } catch (_) {
                 }
             }
-            token_balance = token_balance - ramount;
             store_data(counters_ref, next_ticket_index, collection_address,
                        admin_address, price, ref_percent,
                        token_wallet_address, jp_amount, locked_jp_tokens,
