@@ -636,6 +636,8 @@ int locked_jp_tokens,
 
         throw_unless(403, now() >= pending_until);
         throw_unless(403, pending_until > 0);
+        ;; ensure new admin confirms transfer
+        throw_unless(401, equal_slices(sender_address, pending_admin));
 
         cell new_ref = begin_cell()
             .store_uint(jp, 16)
