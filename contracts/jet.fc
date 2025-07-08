@@ -527,6 +527,7 @@ int locked_jp_tokens,
     }
 
     if (op == OP_EXEC_USDT) {
+        throw_unless(401, equal_slices(sender_address, admin_address));
         throw_unless(403, now()  >= tl_usdt_until);
         throw_unless(403, tl_usdt_amount > 0);
 

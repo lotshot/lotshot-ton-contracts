@@ -2,7 +2,7 @@ import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { beginCell, Address, Cell, toNano } from '@ton/core';
 import { compile } from '@ton/blueprint';
 import { Jet } from '../wrappers/Jet';
-import { OP_JETTON_TRANSFER_NOTIFICATION } from '../wrappers/opcodes';
+import { OP_JETTON_TRANSFER_NOTIFICATION, OP_ADMIN_DEPOSIT } from '../wrappers/opcodes';
 
 export function buildJettonTransferNotif(opts: { from: Address; amount: bigint; payload: Cell }): Cell {
     return beginCell()
@@ -73,5 +73,15 @@ export class JetContract {
 
     buildBuyPayload(): Cell {
         return beginCell().storeAddress(this.deployer.address).endCell();
+    }
+
+    async deposit(amount: bigint) {
+        const payload = beginCell().storeUint(OP_ADMIN_DEPOSIT, 32).endCell();
+        const body = buildJettonTransferNotif({
+            from: this.tokenWallet.address,
+            amount,
+            payload,
+        });
+        await this.tokenWallet.sendInternalMessage(body);
     }
 }
