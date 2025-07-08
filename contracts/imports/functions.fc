@@ -129,7 +129,7 @@ slice token_wallet  ;; contract's Jetton wallet
     var refund_body = begin_cell()
         .store_uint(op::jetton_transfer(), 32)
         .store_uint(query_id, 64)
-        .store_coins(amount)
+        .store_coins(amount * jetton_decimals())
         .store_slice(recipient)
         ;; excess gas and notifications back to initiator
         .store_slice(recipient)
