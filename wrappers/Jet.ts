@@ -39,9 +39,18 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeUint(0, 16)
         .endCell();
 
+    const timelock = beginCell()
+        .storeCoins(0) // tl_ton_amount
+        .storeUint(0, 64) // tl_ton_until
+        .storeUint(timelockDelay, 64)
+        .storeAddress(null) // new_admin_address
+        .storeUint(0, 64) // tl_admin_until
+        .endCell();
+
     return (
         beginCell()
             .storeRef(counters)
+            .storeRef(timelock)
             .storeUint(0, 64) // next_ticket_index
             .storeAddress(config.collectionAddress)
             .storeAddress(Address.parse(config.adminAddress))
@@ -49,11 +58,6 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .storeUint(config.refPercent, 16)
             .storeCoins(toNano(jackpotAmount))
             .storeCoins(0) // locked_jp_coins
-            .storeCoins(0) // tl_ton_amount
-            .storeUint(0, 64) // tl_ton_until
-            .storeUint(timelockDelay, 64)
-            .storeAddress(null) // new_admin_address
-            .storeUint(0, 64) // tl_admin_until
             .endCell()
     );
 }
