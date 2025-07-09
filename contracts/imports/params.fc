@@ -1,17 +1,17 @@
 
-int workchain() asm "0 PUSHINT";
+int workchain() inline { return 0; }
 
 slice null_addr() asm "b{00} PUSHSLICE";
-int flag::regular() asm "0x10 PUSHINT";
-int flag::bounce() asm "0x18 PUSHINT";   ;; internal + bounce, IHR-off
-int mint_fee() asm "50000000 PUSHINT"; ;; 0.15 TON is too large, try set 0.05 TON
-int storage_coins() asm "20000000 PUSHINT"; ;; 0.02 TON
-int player_fee() asm "50000000 PUSHINT"; ;; 0.05 TON
-int jetton_decimals() asm "1000000 PUSHINT"; ;; jetton has 6 decimal places
+int flag::regular() inline { return 0x10; }
+int flag::bounce() inline { return 0x18; }   ;; internal + bounce, IHR-off
+int mint_fee() inline { return 50000000; } ;; 0.15 TON is too large, try set 0.05 TON
+int storage_coins() inline { return 20000000; } ;; 0.02 TON
+int player_fee() inline { return 50000000; } ;; 0.05 TON
+int jetton_decimals() inline { return 1000000; } ;; jetton has 6 decimal places
 ;; 0.15 TON кладём в сообщение для оплаты всех расходов
-int outer_fee() asm "150000000 PUSHINT";    ;; 0.15 TON
+int outer_fee() inline { return 150000000; }    ;; 0.15 TON
 ;; 0.05 TON пересылаем игроку вместе с jetton-transfer
-int forward_fee() asm "50000000 PUSHINT";   ;; 0.05 TON
-int transfer_fee() asm "70000000 PUSHINT"; ;; 0.05 TON (maybe 0.07 TON is too small)
-int min_ticket_value() asm "390000000 PUSHINT"; ;; minimal ton value to cover worst case (~0.39 TON)
+int forward_fee() inline { return 50000000; }   ;; 0.05 TON
+int transfer_fee() inline { return 70000000; } ;; 0.05 TON (maybe 0.07 TON is too small)
+int min_ticket_value() inline { return 390000000; } ;; minimal ton value to cover worst case (~0.39 TON)
 
