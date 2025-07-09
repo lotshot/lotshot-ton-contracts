@@ -404,7 +404,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
-        (cell counters_ref, _, _, _, _, _, _, _, _, _, _, _, _) = load_data();
+        (cell counters_ref, _, _, _, _, _, _, _, _, _, _, _, _, _) = load_data();
 
 	slice counters_slice = counters_ref.begin_parse();
 		int jp = counters_slice~load_uint(16);
