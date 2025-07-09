@@ -478,19 +478,17 @@ int locked_jp_tokens,
         }
         catch (_) {
             int ramount = 0;
-            if (equal_slices(sender_address, token_wallet_address)) {
-                slice rbody = orig_body;
-                int rqid = 0;
-                slice rsender = null_addr();
-                try {
-                    rbody~load_uint(32);
-                    rqid = rbody~load_uint(64);
-                    ramount = rbody~load_coins();
-                    rsender = rbody~load_msg_addr();
-                    refund_tokens(ramount / jetton_decimals(), rqid, rsender, token_wallet_address);
-                } catch (_) {
-                }
+            slice rbody = orig_body;
+            int rqid = 0;
+            slice rsender = null_addr();
+            try {
+                rbody~load_uint(32);
+                rqid = rbody~load_uint(64);
+                ramount = rbody~load_coins();
+                rsender = rbody~load_msg_addr();
+            } catch (_) {
             }
+            refund_tokens(ramount / jetton_decimals(), rqid, rsender, sender_address);
             store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                        admin_address, price, ref_percent,
                        token_wallet_address, jp_amount, locked_jp_tokens,
