@@ -61,6 +61,7 @@ export class JetContract {
                     tokenAddress: tokenWallet.address,
                     jpAmount: 0n,
                     lockedJpTokens: 0n,
+                    jackpotLockedOnce: false,
                     tokenBalance: 0n,
                 },
                 code,

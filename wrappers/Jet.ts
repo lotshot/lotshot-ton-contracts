@@ -9,6 +9,7 @@ export type JetConfig = {
     tokenAddress: Address;
     jpAmount?: bigint;
     lockedJpTokens?: bigint;
+    jackpotLockedOnce?: boolean;
     tokenBalance?: bigint;
     tlUsdtAmount?: bigint;
     tlUsdtUntil?: bigint;
@@ -24,6 +25,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
     const extraRef = beginCell()
         .storeCoins(config.jpAmount ?? 0n)
         .storeCoins(config.lockedJpTokens ?? 0n)
+        .storeUint(config.jackpotLockedOnce ? 1 : 0, 1)
         .storeCoins(config.tokenBalance ?? 0n)
         .storeCoins(config.tlUsdtAmount ?? 0n)
         .storeUint(config.tlUsdtUntil ?? 0n, 64)
@@ -211,6 +213,7 @@ export class Jet implements Contract {
             tokenWallet: res.stack.readAddressOpt(),
             jpAmount: res.stack.readBigNumber(),
             lockedJpTokens: res.stack.readBigNumber(),
+            jackpotLockedOnce: res.stack.readNumber(),
             tokenBalance: res.stack.readBigNumber(),
             tlUsdtAmount: res.stack.readBigNumber(),
             tlUsdtUntil: res.stack.readBigNumber(),

@@ -49,6 +49,7 @@ describe('Jet', () => {
                     tokenAddress: deployer.address,
                     jpAmount: 0n,
                     lockedJpTokens: 0n,
+                    jackpotLockedOnce: false,
                     tokenBalance: 0n,
                 },
                 code,
