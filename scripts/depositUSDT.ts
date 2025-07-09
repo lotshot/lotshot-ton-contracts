@@ -53,7 +53,7 @@ export async function run(provider: NetworkProvider) {
         .storeAddress(jetAddr)         // **dest = Jet contract (NOT its wallet)**
         .storeAddress(adminEOA)        // response_destination (any address)
         .storeUint(0, 1)               // no custom_payload
-        .storeCoins(toNano('0.27'))    // forward TON for Jet contract gas
+        .storeCoins(toNano('0.39'))    // forward TON for Jet contract gas
         .storeUint(1, 1)               // forward_payload is stored in **ref**
         .storeRef(fwdPayload)          // ref with 32-bit 'DEPO'
         .endCell();

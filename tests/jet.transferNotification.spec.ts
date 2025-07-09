@@ -22,7 +22,7 @@ describe('jet.fc – sender validation', () => {
       amount: jet.ticketPrice,
       payload: jet.buildBuyPayload(),
     });
-    const result = await fake.send({ to: jet.contract.address, value: 270000000n, body: notif });
+    const result = await fake.send({ to: jet.contract.address, value: 390000000n, body: notif });
     expect(result.transactions).toHaveTransaction({ exitCode: 0 });
   });
 });

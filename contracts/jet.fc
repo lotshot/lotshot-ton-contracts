@@ -211,7 +211,7 @@ int locked_jp_tokens,
 
         int excess = amount - price;
         if (excess > 0) {
-                var refund_transfer = begin_cell()
+            var refund_transfer = begin_cell()
                 .store_uint(op::jetton_transfer(), 32)
                 .store_uint(qid, 64)
                 .store_coins(excess)
@@ -219,14 +219,16 @@ int locked_jp_tokens,
                 ;; excess gas and notifications back to initiator
                 .store_slice(sender_wallet)
                 .store_maybe_ref(null())
-                .store_coins(1)
+                ;; provide gas for the player's wallet
+                .store_coins(forward_fee())
                 .store_uint(0, 1)
                 .end_cell();
 
             var refund_msg = begin_cell()
                 .store_uint(flag::bounce(), 6)
                 .store_slice(token_wallet_address)
-                .store_coins(1)
+                ;; supply Jetton wallet with forwarding gas
+                .store_coins(outer_fee())
                 ;; payload stored in a reference -> body_ref flag must be 1
                 .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_ref(refund_transfer)

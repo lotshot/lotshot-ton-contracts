@@ -38,7 +38,7 @@ export class JetContract {
             sendInternalMessage: async (body: Cell) => {
                 await tokenWallet.send({
                     to: contract.address,
-                    value: toNano('0.27'),
+                    value: toNano('0.39'),
                     body,
                 });
             },
@@ -67,7 +67,7 @@ export class JetContract {
             ),
         );
 
-        await contract.sendDeploy(deployer.getSender(), toNano('0.27'));
+        await contract.sendDeploy(deployer.getSender(), toNano('0.39'));
         return new JetContract(blockchain, deployer, tokenWallet, contract, ticketPrice);
     }
 

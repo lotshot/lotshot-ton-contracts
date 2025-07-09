@@ -29,7 +29,7 @@ describe('Jet', () => {
 
         await deployer.send({
             to: jet.address,
-            value: toNano('0.27'),
+            value: toNano('0.39'),
             body,
         });
     }
@@ -55,7 +55,7 @@ describe('Jet', () => {
             ),
         );
 
-        const deployResult = await jet.sendDeploy(deployer.getSender(), toNano('0.27'));
+        const deployResult = await jet.sendDeploy(deployer.getSender(), toNano('0.39'));
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
