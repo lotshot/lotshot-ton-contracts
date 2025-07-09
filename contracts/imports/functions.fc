@@ -112,7 +112,8 @@ slice token_wallet  ;; contract's Jetton wallet
     var jet_msg = begin_cell()
         .store_uint(flag::bounce(), 6)
         .store_slice(token_wallet)
-        .store_coins(1)
+        ;; Jetton wallet already has TON for gas
+        .store_coins(0)
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_ref(jet_body)
         .end_cell();
@@ -134,14 +135,16 @@ slice token_wallet  ;; contract's Jetton wallet
         ;; excess gas and notifications back to initiator
         .store_slice(recipient)
         .store_maybe_ref(null())
-        .store_coins(1)
+        ;; enough TON for the player's wallet to process transfer
+        .store_coins(forward_fee())
         .store_uint(0, 1)
         .end_cell();
 
     var refund_msg = begin_cell()
         .store_uint(flag::bounce(), 6)
         .store_slice(token_wallet)
-        .store_coins(1)
+        ;; provide gas for Jetton wallet forwarding
+        .store_coins(outer_fee())
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_ref(refund_body)
         .end_cell();
