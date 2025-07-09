@@ -137,6 +137,7 @@ const int OP_EXEC_ADMIN     = 8;
                 }
 
                 if (op == OP_EXEC_TON) {
+                        throw_unless(401, equal_slices(sender_address, admin_address));
                         throw_unless(403, now() >= tl_ton_until);
                         throw_unless(403, tl_ton_amount > 0);
 
