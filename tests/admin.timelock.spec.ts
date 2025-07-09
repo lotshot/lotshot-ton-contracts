@@ -1,4 +1,5 @@
 import { JetContract } from '../helpers';
+import { toNano } from '@ton/core';
 import '@ton/test-utils';
 
 describe('jet.fc – admin timelock', () => {
@@ -26,5 +27,18 @@ describe('jet.fc – admin timelock', () => {
 
     const data = await jet.contract.getFullData();
     expect(data.admin?.equals(jet.deployer.address)).toBe(true);
+  });
+
+  it('only new admin can confirm transfer', async () => {
+    const jet = await JetContract.deploy();
+    const newAdmin = await jet.blockchain.treasury('pending-admin');
+
+    await jet.contract.sendScheduleAdminChange(jet.deployer.getSender(), newAdmin.address, toNano('0.1'));
+
+    const fail = await jet.contract.sendExecuteAdminChange(jet.deployer.getSender(), toNano('0.1'));
+    expect(fail.transactions).toHaveTransaction({ exitCode: 401 });
+
+    const ok = await jet.contract.sendExecuteAdminChange(newAdmin.getSender(), toNano('0.1'));
+    expect(ok.transactions).toHaveTransaction({ exitCode: 0 });
   });
 });
