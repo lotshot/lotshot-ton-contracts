@@ -42,7 +42,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
         .storeUint(0, 16)
         .endCell();
 
-    const adminRef = beginCell()
+    const adminTransferRef = beginCell()
         .storeAddress(config.newAdminAddress ?? null)
         .storeUint(config.tlAdminUntil ?? 0n, 64)
         .endCell();
@@ -50,7 +50,7 @@ export function jetConfigToCell(config: JetConfig): Cell {
     return (
         beginCell()
             .storeRef(countersRef)
-            .storeRef(adminRef)
+            .storeRef(adminTransferRef)
             .storeUint(0, 64)
             .storeAddress(config.collectionAddress)
             .storeAddress(Address.parse(config.adminAddress))
