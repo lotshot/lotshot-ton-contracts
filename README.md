@@ -7,9 +7,7 @@
 
 Lotshot is a decentralized lottery running entirely on the TON blockchain. The smart contracts are written in FunC and managed through a TypeScript tooling stack. Together they deploy an NFT collection and handle a lottery where prizes are paid out in jettons.
 
-The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. When the Jackpot (10 000 USDT) is won, the lottery continues without pause.  
-The Jackpot line is removed, while all remaining prize tiers (Major → Try-Again) stay active  
-and new tickets remain fully valid for those rewards.
+The lottery accepts jetton payments for tickets. A random number determines which prize tier is won, and counters limit how many prizes of each level can be issued per round. After the jackpot (10 000 USDT) is won, the lottery continues without pause: no more jackpot payouts, but tickets can still be purchased and other prize levels remain active.
 
 ## Setup
 1. Run `npm install` to install the project dependencies.

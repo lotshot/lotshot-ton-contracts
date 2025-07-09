@@ -304,9 +304,7 @@ int locked_jp_tokens,
         int mini = counters_slice~load_uint(16);
         end_parse(counters_slice);
 
-        if (jp > 0) {
-            return ();
-        }
+
 
         if (x == 0) { ;; Jackpot 1/12000
             if (jp == 0) {
@@ -319,24 +317,24 @@ int locked_jp_tokens,
                 token_balance = token_balance - (jp_amount * jetton_decimals());
                 locked_jp_tokens = 0;      ;; reserve released
                 jp               = 1;      ;; jackpot claimed
-                next_ticket_index += 1;
-
-                ;; persist state
-                cell new_ref = begin_cell()
-                    .store_uint(jp, 16)
-                    .store_uint(major, 16)
-                    .store_uint(high, 16)
-                    .store_uint(mid, 16)
-                    .store_uint(low_mid, 16)
-                    .store_uint(low, 16)
-                    .store_uint(mini, 16)
-                    .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address,
-                           admin_address, price, ref_percent,
-                           token_wallet_address, jp_amount, locked_jp_tokens,
-                           token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
-                return ();
             }
+            next_ticket_index += 1;
+
+            ;; persist state
+            cell new_ref = begin_cell()
+                .store_uint(jp, 16)
+                .store_uint(major, 16)
+                .store_uint(high, 16)
+                .store_uint(mid, 16)
+                .store_uint(low_mid, 16)
+                .store_uint(low, 16)
+                .store_uint(mini, 16)
+                .end_cell();
+            store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address,
+                       admin_address, price, ref_percent,
+                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+            return ();
         }
 
         ;; Major: 3 prizes (x = 1..3)
