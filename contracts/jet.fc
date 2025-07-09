@@ -247,9 +247,6 @@ const int OP_EXEC_ADMIN     = 8;
 		int x3 = counters_slice~load_uint(16);
 		int x1 = counters_slice~load_uint(16);
 
-		if (jp > 0) {
-			return();
-		}
 
                 if (x == 0) { ;; rolled 0
                         if (jp == 0) { ;; jackpot has not been drawn yet
