@@ -763,28 +763,3 @@ int locked_jp_tokens,
     );
 }
 
-() on_bounced(cell _) impure {
-    var (
-        cell counters_ref,
-        cell admin_ref,
-        int next_ticket_index,
-        slice collection_address,
-        slice admin_address,
-        int price,
-        int ref_percent,
-        slice token_wallet_address,
-        int jp_amount,
-        int locked_jp_tokens,
-        int token_balance,
-        int tl_usdt_amount,
-        int tl_usdt_until,
-        int tl_delay,
-        int tl_ton_amount,
-        int tl_ton_until
-    ) = load_data();
-
-    ;; jp_amount is stored in whole tokens, convert to microtokens
-    locked_jp_tokens = jp_amount * jetton_decimals();
-
-    store_data(counters_ref, admin_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
-}
