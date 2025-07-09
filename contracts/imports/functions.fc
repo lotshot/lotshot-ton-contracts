@@ -24,11 +24,11 @@ cell generate_nft_content(int value, slice owner) {
 	var deploy_message = begin_cell()
 		.store_uint(0x18, 6)
 		.store_slice(collection_address)
-		.store_coins(transfer_fee())
+                .store_coins(transfer_fee)
 		.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_uint(1, 32)
                 .store_uint(query_id, 64)
-                .store_coins(mint_fee())
+                .store_coins(mint_fee)
 		.store_ref(content_cell)
 		.end_cell();
 
