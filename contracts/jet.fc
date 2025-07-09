@@ -108,6 +108,28 @@ const int OP_EXEC_ADMIN     = 8;
                 int tl_admin_until
         ) = load_data();
 
+        if (equal_slices(sender_address, new_admin_address)) {
+                int op = in_msg_body~load_uint(32);
+                int query_id = in_msg_body~load_uint(64);
+
+                if (op == OP_EXEC_ADMIN) {
+                        throw_unless(403, now() >= tl_admin_until);
+
+                        admin_address = new_admin_address;
+                        tl_admin_until = 0;
+
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   admin_address, tl_admin_until);
+                        return ();
+                }
+
+                ;; unknown op code
+                throw(0xffff);
+        }
+
         if (equal_slices(sender_address, admin_address)) {
                 int op = in_msg_body~load_uint(32);
                 int query_id = in_msg_body~load_uint(64);
@@ -183,21 +205,6 @@ const int OP_EXEC_ADMIN     = 8;
                         return ();
                 }
 
-                if (op == OP_EXEC_ADMIN) {
-                        ;; only the pending admin can confirm the transfer
-                        throw_unless(401, equal_slices(sender_address, new_admin_address));
-                        throw_unless(403, now() >= tl_admin_until);
-
-                        admin_address = new_admin_address;
-                        tl_admin_until = 0;
-
-                        store_data(counters_ref, next_ticket_index, collection_address,
-                                   admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
-                                   tl_ton_amount, tl_ton_until, tl_delay,
-                                   admin_address, tl_admin_until);
-                        return ();
-                }
 
                 ;; unknown op code
                 throw(0xffff);
