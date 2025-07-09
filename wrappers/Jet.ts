@@ -59,8 +59,9 @@ export function jetConfigToCell(config: JetConfig): Cell {
             .storeUint(config.refPercent, 16)
             .storeCoins(toNano(jackpotAmount))
             .storeCoins(0) // locked_jp_coins
+            .storeUint(0, 1) // jackpot_locked_once
             .endCell()
-    );
+      );
 }
 
 export class Jet implements Contract {

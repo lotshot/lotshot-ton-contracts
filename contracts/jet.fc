@@ -16,6 +16,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
         int,   ;; ref_percent
         int,   ;; jackpot_amount (nanoTON)
         int,   ;; locked_jp_coins reserve
+        int,   ;; jackpot_locked_once flag (0/1)
         int,   ;; scheduled TON amount
         int,   ;; unlock timestamp
         int,   ;; per-contract delay (sec)
@@ -35,6 +36,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                 ds~load_uint(16),
                 ds~load_coins(),
                 ds~load_coins(),
+                ds~load_uint(1),
                 tl~load_coins(),
                 tl~load_uint(64),
                 tl~load_uint(64),
@@ -52,6 +54,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
         int ref_percent,
         int jackpot_amount,
         int locked_jp_coins,
+        int jackpot_locked_once,
         int tl_ton_amount,
         int tl_ton_until,
         int tl_delay,
@@ -77,6 +80,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                 .store_uint(ref_percent, 16)
                 .store_coins(jackpot_amount)
                 .store_coins(locked_jp_coins)
+                .store_uint(jackpot_locked_once, 1)
                 .end_cell()
         );
 }
@@ -102,6 +106,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                 int ref_percent,
                 int jackpot_amount,
                 int locked_jp_coins,
+                int jackpot_locked_once,
                 int tl_ton_amount,
                 int tl_ton_until,
                 int tl_delay,
@@ -121,7 +126,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 
                         store_data(counters_ref, next_ticket_index, collection_address,
                                    admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
+                                   jackpot_amount, locked_jp_coins, jackpot_locked_once,
                                    tl_ton_amount, tl_ton_until, tl_delay,
                                    admin_address, tl_admin_until);
                         return ();
@@ -139,7 +144,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                         ;; admin deposit TON, simply store state
                         store_data(counters_ref, next_ticket_index, collection_address,
                                    admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
+                                   jackpot_amount, locked_jp_coins, jackpot_locked_once,
                                    tl_ton_amount, tl_ton_until, tl_delay,
                                    new_admin_address, tl_admin_until);
                         return ();
@@ -161,7 +166,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 
                         store_data(counters_ref, next_ticket_index, collection_address,
                                    admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
+                                   jackpot_amount, locked_jp_coins, jackpot_locked_once,
                                    tl_ton_amount, tl_ton_until, tl_delay,
                                    new_admin_address, tl_admin_until);
                         return ();
@@ -188,7 +193,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 
                         store_data(counters_ref, next_ticket_index, collection_address,
                                    admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
+                                   jackpot_amount, locked_jp_coins, jackpot_locked_once,
                                    tl_ton_amount, tl_ton_until, tl_delay,
                                    new_admin_address, tl_admin_until);
                         return ();
@@ -205,7 +210,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 
                         store_data(counters_ref, next_ticket_index, collection_address,
                                    admin_address, price, ref_percent,
-                                   jackpot_amount, locked_jp_coins,
+                                   jackpot_amount, locked_jp_coins, jackpot_locked_once,
                                    tl_ton_amount, tl_ton_until, tl_delay,
                                    new_admin_address, tl_admin_until);
                         return ();
@@ -218,9 +223,10 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                 throw_unless(400, msg_value == price);
                 int ticket_value = msg_value;
 
-                ;; Reserve the configured jackpot once the first ticket is sold
-                if (locked_jp_coins == 0) {
-                        locked_jp_coins = jackpot_amount;  ;; first ticket → lock jackpot reserve
+                ;; Reserve the configured jackpot only on the very first ticket
+                if (jackpot_locked_once == 0) {
+                        locked_jp_coins = jackpot_amount;
+                        jackpot_locked_once = 1;
                 }
 
                 if (slice_bits(in_msg_body) == 267) {
@@ -271,7 +277,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                                         .store_uint(x3, 16)
                                         .store_uint(x1, 16)
                                         .end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
                                 return();
                         }
                 }
@@ -290,7 +296,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
@@ -309,7 +315,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
@@ -328,7 +334,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
@@ -347,7 +353,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
@@ -366,7 +372,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
@@ -385,14 +391,14 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 					.store_uint(x3, 16)
 					.store_uint(x1, 16)
 					.end_cell();
-                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                                store_data(new_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 				return();
 			}
 		}
 
 		next_ticket_index += 1;
                 send_winning(0, sender_address, "lose", collection_address, 7, 0);
-                store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
+                store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 		return();
 
 }
@@ -430,6 +436,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
                 int ref_percent,
                 int jackpot_amount,
                 int locked_jp_coins,
+                int jackpot_locked_once,
                 int tl_ton_amount,
                 int tl_ton_until,
                 int tl_delay,
