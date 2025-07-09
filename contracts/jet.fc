@@ -48,6 +48,7 @@ const int OP_EXEC_TON     = 12;
     int ref_percent = ds~load_uint(8);
     slice wallet_ref = ds~load_ref().begin_parse();
     slice token_wallet_address = wallet_ref~load_msg_addr();
+    end_parse(wallet_ref);
 
     slice extra_ref = ds~load_ref().begin_parse();
     int jp_amount = extra_ref~load_coins();
@@ -58,6 +59,9 @@ const int OP_EXEC_TON     = 12;
     int tl_delay = extra_ref~load_uint(64);
     int tl_ton_amount = extra_ref~load_coins();
     int tl_ton_until = extra_ref~load_uint(64);
+    end_parse(extra_ref);
+
+    end_parse(ds);
     return (
         counters_ref,
         admin_transfer_ref,
@@ -296,6 +300,7 @@ int locked_jp_tokens,
         int low_mid = counters_slice~load_uint(16);
         int low = counters_slice~load_uint(16);
         int mini = counters_slice~load_uint(16);
+        end_parse(counters_slice);
 
         if (jp > 0) {
             return ();
@@ -604,6 +609,7 @@ int locked_jp_tokens,
         slice admin_slice = admin_transfer_ref.begin_parse();
         slice pending_admin = admin_slice~load_msg_addr();
         int pending_until = admin_slice~load_uint(64);
+        end_parse(admin_slice);
 
         throw_unless(403, now() >= pending_until);
         throw_unless(403, pending_until > 0);
@@ -652,6 +658,7 @@ int locked_jp_tokens,
     int low_mid = counters_slice~load_uint(16);
     int low = counters_slice~load_uint(16);
     int mini = counters_slice~load_uint(16);
+    end_parse(counters_slice);
     return (
         jp,
         major,
