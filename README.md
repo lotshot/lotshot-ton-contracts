@@ -131,7 +131,7 @@ determines the reward level, provided that tier still has prizes left:
 > **Post-Jackpot behaviour**  
 > Once the Jackpot **×1000** tier is claimed, its row is removed,
 > but all other prize tiers remain active and ticket sales continue without pause.
-The ×1000 jackpot is paid exactly once; after that, ticket purchases continue awarding all other prize tiers.
+The jackpot reserve is locked on the very first ticket purchase only; once won, it is never re-locked. All other prize tiers continue operating under their normal counters.
 > Players can verify which rewards are still available by inspecting the NFT attributes
 > `Reward Level` and `Winning Amount` on Getgems.
 
