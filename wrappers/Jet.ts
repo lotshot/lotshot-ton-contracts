@@ -14,6 +14,7 @@ import {
     OP_SCHEDULE_ADMIN,
     OP_EXEC_TON,
     OP_EXEC_ADMIN,
+    OP_ADMIN_DEPOSIT,
 } from './opcodes';
 
 export type JetConfig = {
@@ -132,6 +133,19 @@ export class Jet implements Contract {
     async sendExecuteAdminChange(provider: ContractProvider, via: Sender, value: bigint) {
         const body = beginCell()
             .storeUint(OP_EXEC_ADMIN, 32)
+            .storeUint(0, 64)
+            .endCell();
+
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body,
+        });
+    }
+
+    async sendAdminDeposit(provider: ContractProvider, via: Sender, value: bigint) {
+        const body = beginCell()
+            .storeUint(OP_ADMIN_DEPOSIT, 32)
             .storeUint(0, 64)
             .endCell();
 

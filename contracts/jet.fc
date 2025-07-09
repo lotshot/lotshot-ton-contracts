@@ -5,6 +5,7 @@ const int OP_SCHEDULE_TON   = 2;
 const int OP_SCHEDULE_ADMIN = 3;
 const int OP_EXEC_TON       = 7;
 const int OP_EXEC_ADMIN     = 8;
+const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 
 (
         cell,  ;; counters
@@ -133,6 +134,16 @@ const int OP_EXEC_ADMIN     = 8;
         if (equal_slices(sender_address, admin_address)) {
                 int op = in_msg_body~load_uint(32);
                 int query_id = in_msg_body~load_uint(64);
+
+                if (op == OP_ADMIN_DEPOSIT) {
+                        ;; admin deposit TON, simply store state
+                        store_data(counters_ref, next_ticket_index, collection_address,
+                                   admin_address, price, ref_percent,
+                                   jackpot_amount, locked_jp_coins,
+                                   tl_ton_amount, tl_ton_until, tl_delay,
+                                   new_admin_address, tl_admin_until);
+                        return ();
+                }
 
                 if (op == OP_SCHEDULE_TON) {
                         int free = my_balance - locked_jp_coins - 50000000;   ;; 0.05 TON reserve
