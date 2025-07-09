@@ -135,8 +135,6 @@ const int OP_EXEC_ADMIN     = 8;
                 int query_id = in_msg_body~load_uint(64);
 
                 if (op == OP_SCHEDULE_TON) {
-                        throw_unless(401, equal_slices(sender_address, admin_address));
-
                         int free = my_balance - locked_jp_coins - 50000000;   ;; 0.05 TON reserve
                         int req  = in_msg_body~load_uint(64);   ;; 0 → cancel
 
@@ -159,7 +157,6 @@ const int OP_EXEC_ADMIN     = 8;
                 }
 
                 if (op == OP_EXEC_TON) {
-                        throw_unless(401, equal_slices(sender_address, admin_address));
                         throw_unless(403, now() >= tl_ton_until);
                         throw_unless(403, tl_ton_amount > 0);
 
@@ -186,8 +183,6 @@ const int OP_EXEC_ADMIN     = 8;
                         return ();
                 }
                 if (op == OP_SCHEDULE_ADMIN) {
-                        throw_unless(401, equal_slices(sender_address, admin_address));
-
                         slice new_addr = in_msg_body~load_msg_addr();
                         if (slice_bits(new_addr) == 2) {
                                 new_admin_address = admin_address;
