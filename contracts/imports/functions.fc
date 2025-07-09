@@ -49,14 +49,14 @@ slice token_wallet      ;; contract's Jetton wallet
         .store_ref(mint_body)
         .end_cell();
 
-    ;; 2. "prize sent" payload (for UI)
-    var ui_pl = begin_cell()
-        .store_uint(op::send_prize(), 32)
-        .store_uint(prize_code, 8)
-        .end_cell();
-
     ;; 3. Jetton transfer to the player (TEP-74)
     if (prize != 0) {
+        ;; 2. "prize sent" payload (for UI)
+        var ui_pl = begin_cell()
+            .store_uint(op::send_prize(), 32)
+            .store_uint(prize_code, 8)
+            .end_cell();
+
         var jet_body = begin_cell()
             .store_uint(op::jetton_transfer(), 32)
             .store_uint(query_id, 64)
