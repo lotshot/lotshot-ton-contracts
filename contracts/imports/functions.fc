@@ -33,18 +33,17 @@ cell generate_nft_content(int value, slice owner) {
 		.end_cell();
 
 
-        if (value != 0) {
-                var msg = begin_cell()
-                        .store_uint(0x18, 6)
-                        .store_slice(address)
-                        .store_coins(value)
-                        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                        .store_uint(0, 32)
-                        .store_slice(text)
-                        .end_cell();
+        var msg = begin_cell()
+                .store_uint(0x18, 6)
+                .store_slice(address)
+                .store_coins(value)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .store_uint(0, 32)
+                .store_slice(text)
+                .end_cell();
 
-                send_raw_message(msg, 1);
-        }
+        ;; always send notification even if no coins are transferred
+        send_raw_message(msg, 1);
 
         send_raw_message(deploy_message, 1);
 }
