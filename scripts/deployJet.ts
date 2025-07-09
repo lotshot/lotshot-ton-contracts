@@ -46,6 +46,7 @@ export async function run(provider: NetworkProvider) {
         tokenAddress: lotteryConfig.tokenAddress,
         jpAmount: jpUsdt,
         lockedJpTokens: 0n,
+        jackpotLockedOnce: false,
         tokenBalance: 0n,
         tlUsdtAmount: 0n,
         tlUsdtUntil: 0n,

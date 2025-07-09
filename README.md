@@ -31,6 +31,8 @@ The lottery accepts jetton payments for tickets. A random number determines whic
 
 The repository also provides `depositUSDT` to deposit liquidity from the admin account. Deposited USDT is locked until the jackpot lock amount has been funded.
 
+The jackpot reserve is locked on the first ticket purchase only; after the jackpot is won, it is never re-locked. All other prizes continue as per their counters.
+
 The `deployJet.ts` script also exposes `withdraw()` and two helper functions,
 `scheduleUSDTWithdrawal()` and `executeUSDTWithdrawal()`, to manage USDT
 withdrawals via the timelock. Amounts for these helpers are provided in whole

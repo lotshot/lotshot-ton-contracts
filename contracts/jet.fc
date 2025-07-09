@@ -31,6 +31,7 @@ const int OP_EXEC_TON     = 12;
     slice, ;; token_wallet_address
     int,   ;; jp_amount
     int,   ;; locked_jp_tokens
+    int,   ;; jackpot_locked_once
     int,   ;; token_balance
     int,   ;; tl_usdt_amount
     int,   ;; tl_usdt_until
@@ -53,6 +54,7 @@ const int OP_EXEC_TON     = 12;
     slice extra_ref = ds~load_ref().begin_parse();
     int jp_amount = extra_ref~load_coins();
     int locked_jp_tokens = extra_ref~load_coins();
+    int jackpot_locked_once = extra_ref~load_uint(1);
     int token_balance = extra_ref~load_coins();
     int tl_usdt_amount = extra_ref~load_coins();
     int tl_usdt_until = extra_ref~load_uint(64);
@@ -73,6 +75,7 @@ const int OP_EXEC_TON     = 12;
         token_wallet_address,
         jp_amount,
         locked_jp_tokens,
+        jackpot_locked_once,
         token_balance,
         tl_usdt_amount,
         tl_usdt_until,
@@ -93,6 +96,7 @@ int ref_percent,
 slice token_wallet_address,
 int jp_amount,
 int locked_jp_tokens,
+int jackpot_locked_once,
     int token_balance,
     int tl_usdt_amount,
     int tl_usdt_until,
@@ -103,6 +107,7 @@ int locked_jp_tokens,
     cell extra = begin_cell()
         .store_coins(jp_amount)
         .store_coins(locked_jp_tokens)
+        .store_uint(jackpot_locked_once, 1)
         .store_coins(token_balance)
         .store_coins(tl_usdt_amount)
         .store_uint(tl_usdt_until, 64)
@@ -157,6 +162,7 @@ int locked_jp_tokens,
         slice token_wallet_address,
         int jp_amount,
         int locked_jp_tokens,
+        int jackpot_locked_once,
         int token_balance,
         int tl_usdt_amount,
         int tl_usdt_until,
@@ -196,14 +202,15 @@ int locked_jp_tokens,
             }
             token_balance += amount;
             ;; jp_amount is stored in whole tokens, convert to microtokens
-            if (locked_jp_tokens == 0) {
+            if (jackpot_locked_once == 0) {
                 locked_jp_tokens = jp_amount * jetton_decimals();
+                jackpot_locked_once = 1;
             }
 
         if (deposit == 1) {
                 store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                            admin_address, price, ref_percent,
-                           token_wallet_address, jp_amount, locked_jp_tokens,
+                           token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                            token_balance, tl_usdt_amount, tl_usdt_until, tl_delay,
                            tl_ton_amount, tl_ton_until);
                 return();
@@ -332,7 +339,7 @@ int locked_jp_tokens,
                 .end_cell();
             store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address,
                        admin_address, price, ref_percent,
-                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                        token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
             return ();
         }
@@ -353,7 +360,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -376,7 +383,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -399,7 +406,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -422,7 +429,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -445,7 +452,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -468,7 +475,7 @@ int locked_jp_tokens,
                     .store_uint(low, 16)
                     .store_uint(mini, 16)
                     .end_cell();
-                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+                store_data(new_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
                 return();
             }
         }
@@ -477,7 +484,7 @@ int locked_jp_tokens,
 
         send_winning(0, qid, player_address, 7, collection_address, 7, token_wallet_address);
 
-        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
 
         return();
         }
@@ -496,7 +503,7 @@ int locked_jp_tokens,
             refund_tokens(ramount / jetton_decimals(), rqid, rsender, sender_address);
             store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                        admin_address, price, ref_percent,
-                       token_wallet_address, jp_amount, locked_jp_tokens,
+                       token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                        token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
             return();
         }
@@ -524,7 +531,7 @@ int locked_jp_tokens,
 
         store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                    admin_address, price, ref_percent,
-                   token_wallet_address, jp_amount, locked_jp_tokens,
+                   token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                    token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return ();
     }
@@ -544,7 +551,7 @@ int locked_jp_tokens,
 
         store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                    admin_address, price, ref_percent,
-                   token_wallet_address, jp_amount, locked_jp_tokens,
+                   token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                    token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return ();
     }
@@ -559,7 +566,7 @@ int locked_jp_tokens,
         tl_ton_until  = (req == 0) ? 0 : now() + tl_delay;
         store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                    admin_address, price, ref_percent,
-                   token_wallet_address, jp_amount, locked_jp_tokens,
+                   token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                    token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return ();
     }
@@ -586,7 +593,7 @@ int locked_jp_tokens,
         tl_ton_until  = 0;
         store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address,
                    admin_address, price, ref_percent,
-                   token_wallet_address, jp_amount, locked_jp_tokens,
+                   token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once,
                    token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return ();
     }
@@ -601,7 +608,7 @@ int locked_jp_tokens,
             .store_uint(now() + tl_delay, 64)
             .end_cell();
 
-        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return();
     }
 
@@ -621,7 +628,7 @@ int locked_jp_tokens,
             .store_uint(0, 64)
             .end_cell();
 
-        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, pending_admin, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, pending_admin, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return();
     }
 
@@ -633,14 +640,14 @@ int locked_jp_tokens,
             .store_uint(0, 64)
             .end_cell();
 
-        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+        store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, token_wallet_address, jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
         return();
     }
 
 
     if (op == 5) { ;; set token_wallet_address
     throw_unless(401, equal_slices(sender_address, admin_address));
-    store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr(), jp_amount, locked_jp_tokens, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
+    store_data(counters_ref, admin_transfer_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, in_msg_body~load_msg_addr(), jp_amount, locked_jp_tokens, jackpot_locked_once, token_balance, tl_usdt_amount, tl_usdt_until, tl_delay, tl_ton_amount, tl_ton_until);
     return();
     }
 
@@ -648,7 +655,7 @@ int locked_jp_tokens,
 }
 
 (int, int, int, int, int, int, int) get_counters() method_id {
-(cell counters_ref, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = load_data();
+(cell counters_ref, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) = load_data();
 
     slice counters_slice = counters_ref.begin_parse();
     int jp = counters_slice~load_uint(16);
@@ -672,7 +679,7 @@ int locked_jp_tokens,
 
 
 
-(cell, cell, int, slice, slice, int, int, slice, int, int, int, int, int, int, int, int) get_full_data() method_id {
+(cell, cell, int, slice, slice, int, int, slice, int, int, int, int, int, int, int, int, int) get_full_data() method_id {
     var (
         cell counters_ref,
         cell admin_transfer_ref,
@@ -684,6 +691,7 @@ int locked_jp_tokens,
         slice token_wallet_address,
         int jp_amount,
         int locked_jp_tokens,
+        int jackpot_locked_once,
         int token_balance,
         int tl_usdt_amount,
         int tl_usdt_until,
@@ -703,6 +711,7 @@ int locked_jp_tokens,
         token_wallet_address,
         jp_amount,
         locked_jp_tokens,
+        jackpot_locked_once,
         token_balance,
         tl_usdt_amount,
         tl_usdt_until,
