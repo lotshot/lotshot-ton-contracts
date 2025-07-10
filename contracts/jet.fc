@@ -397,7 +397,7 @@ const int OP_ADMIN_DEPOSIT  = 0x4445504f; ;; 'DEPO'
 		}
 
 		next_ticket_index += 1;
-                send_winning(0, sender_address, "lose", collection_address, 7, 0);
+                send_winning(0, sender_address, "Try Again", collection_address, 7, 0);
                 store_data(counters_ref, next_ticket_index, collection_address, admin_address, price, ref_percent, jackpot_amount, locked_jp_coins, jackpot_locked_once, tl_ton_amount, tl_ton_until, tl_delay, new_admin_address, tl_admin_until);
 		return();
 
